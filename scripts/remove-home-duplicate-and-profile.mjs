@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+const path = 'src/App.tsx';
+let source = fs.readFileSync(path, 'utf8');
+const profileStart = '          {/* 3. Profile / Stats Avatar Button */}';
+const shareStart = '          {/* 4. Share App Button */}';
+const p1 = source.indexOf(profileStart);
+const p2 = source.indexOf(shareStart, p1);
+if (p1 < 0 || p2 < 0) throw new Error('profile block markers not found');
+source = source.slice(0, p1) + source.slice(p2).replace('/* 4. Share App Button */', '/* 3. Share App Button */');
+const countdownStart = '                  {/* Digital Prayer Countdown Widget */}';
+const radioStart = '                  {/* Makkah Live Quran Radio Player */}';
+const c1 = source.indexOf(countdownStart);
+const c2 = source.indexOf(radioStart, c1);
+if (c1 < 0 || c2 < 0) throw new Error('countdown block markers not found');
+source = source.slice(0, c1) + source.slice(c2);
+source = source.replace('/* 2. Right Sticky Sidebar Area (Column Span 1) */', '/* Sidebar Area (Column Span 1) */');
+fs.writeFileSync(path, source);
+console.log('Removed duplicate home countdown and profile header button.');

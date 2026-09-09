@@ -1,0 +1,119 @@
+name: Build iOS - Noor Al-Islam
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+  VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+
+jobs:
+  build-ios:
+    name: Build iOS app
+    # Apple requires App Store uploads to use Xcode 26 with the iOS 26 SDK.
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show Apple build environment
+        run: |
+          xcode-select -p
+          xcodebuild -version
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install JavaScript dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+
+      - name: Restore native notification sound
+        run: |
+          test -f ios/App/App/adhan_notification.wav
+          echo 'Native notification sound verified.'
+
+      - name: Verify iOS resources
+        run: |
+          test -f ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-60@3x.png
+          test -f ios/App/App/Info.plist
+          grep -q 'NSLocationWhenInUseUsageDescription' ios/App/App/Info.plist
+          echo 'iOS resources verified.'
+
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project ios/App/App.xcodeproj -scheme App
+
+      - name: Build iOS app without signing
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/NoorAlIslamDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            COMPILER_INDEX_STORE_ENABLE=NO 2>&1 | tee "$RUNNER_TEMP/xcodebuild.log"
+
+      - name: Print Xcode diagnostics if build fails
+        if: ${{ failure() }}
+        run: |
+          echo '========== XCODE ERRORS =========='
+          grep -n -E 'error:|fatal error:|BUILD FAILED|The following build commands failed' "$RUNNER_TEMP/xcodebuild.log" || true
+          echo '========== LAST LOG LINES =========='
+          tail -n 160 "$RUNNER_TEMP/xcodebuild.log" || true
+
+      - name: Package unsigned iOS app
+        run: |
+          APP_PATH="$RUNNER_TEMP/NoorAlIslamDerivedData/Build/Products/Release-iphoneos/App.app"
+          test -d "$APP_PATH"
+          mkdir -p "$RUNNER_TEMP/unsigned-ipa/Payload"
+          cp -R "$APP_PATH" "$RUNNER_TEMP/unsigned-ipa/Payload/NoorAlIslam.app"
+          ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/unsigned-ipa" "$RUNNER_TEMP/NoorAlIslam-unsigned.ipa"
+
+      - name: Upload unsigned iOS app
+        uses: actions/upload-artifact@v4
+        with:
+          name: noor-al-islam-ios-app-unsigned
+          path: ${{ runner.temp }}/NoorAlIslamDerivedData/Build/Products/Release-iphoneos/App.app
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload unsigned IPA package
+        uses: actions/upload-artifact@v4
+        with:
+          name: noor-al-islam-ios-ipa-unsigned
+          path: ${{ runner.temp }}/NoorAlIslam-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Xcode build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: noor-al-islam-ios-xcode-log
+          path: ${{ runner.temp }}/xcodebuild.log
+          if-no-files-found: error
+          retention-days: 14
+
+# This workflow creates an unsigned build for verification.
+# An unsigned IPA cannot be installed on a real iPhone or uploaded to App Store.
+# Apple Distribution Certificate and Provisioning Profile are required for a signed IPA.
