@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const path = 'src/utils/nativeNotifications.ts';
+let source = fs.readFileSync(path, 'utf8');
+source = source.replaceAll('prayer_channel_audio_v5', 'prayer_channel_audio_v6');
+source = source.replaceAll('azkar_morning_channel_v4', 'azkar_morning_channel_v5');
+source = source.replaceAll('azkar_evening_channel_v4', 'azkar_evening_channel_v5');
+source = source.replaceAll('azkar_sleep_channel_v4', 'azkar_sleep_channel_v5');
+source = source.replaceAll('azkar_tahajjud_channel_v4', 'azkar_tahajjud_channel_v5');
+fs.writeFileSync(path, source);
+console.log('Notification channel IDs migrated.');

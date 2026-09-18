@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: noor-al-islam-assistant
+    runtime: docker
+    repo: https://github.com/mly792485-sudo/BODYBHQQQ
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: APP_URL
+        sync: false
