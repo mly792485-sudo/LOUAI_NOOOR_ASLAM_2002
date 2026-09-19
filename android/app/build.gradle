@@ -4,7 +4,7 @@ android {
     namespace = "com.noor.alislam"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.noor.alislam"
+        applicationId "com.noor.alislam.noorApp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2
