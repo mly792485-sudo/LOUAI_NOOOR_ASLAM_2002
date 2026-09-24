@@ -77,9 +77,10 @@ const STATIONS: RadioStation[] = [
 
 interface MakkahLiveRadioPlayerProps {
   isEn?: boolean;
+  countryCode?: string;
 }
 
-export default function MakkahLiveRadioPlayer({ isEn = false }: MakkahLiveRadioPlayerProps) {
+export default function MakkahLiveRadioPlayer({ isEn = false, countryCode = 'BH' }: MakkahLiveRadioPlayerProps) {
   const [selectedStation, setSelectedStation] = useState<RadioStation>(STATIONS[0]);
   const [stations, setStations] = useState<RadioStation[]>(STATIONS);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -95,7 +96,9 @@ export default function MakkahLiveRadioPlayer({ isEn = false }: MakkahLiveRadioP
   // stations are filtered server-side and every URL is restricted to HTTPS.
   useEffect(() => {
     let cancelled = false;
-    fetch('https://de1.api.radio-browser.info/json/stations/search?tag=quran&limit=100&hidebroken=true')
+    const countryFilter = encodeURIComponent(countryCode.toLowerCase());
+    const endpoint = `https://de1.api.radio-browser.info/json/stations/search?tag=quran&countrycode=${countryFilter}&limit=100&hidebroken=true&order=clickcount&reverse=true`;
+    fetch(endpoint)
       .then((response) => response.ok ? response.json() : [])
       .then((items: any[]) => {
         if (cancelled || !Array.isArray(items)) return;
@@ -113,16 +116,17 @@ export default function MakkahLiveRadioPlayer({ isEn = false }: MakkahLiveRadioP
             countryCode: item.countrycode,
           }));
         const seen = new Set<string>();
-        const merged = [...STATIONS, ...discovered].filter((station) => {
+        const localStations = discovered.length > 0 ? discovered : STATIONS;
+        const merged = [...localStations, ...discovered, ...STATIONS].filter((station) => {
           if (seen.has(station.url)) return false;
           seen.add(station.url);
           return true;
         });
         setStations(merged);
       })
-      .catch(() => { /* Keep the bundled fallback stations when discovery is offline. */ });
+      .catch(() => { /* Keep the bundled official-page fallbacks when discovery is offline. */ });
     return () => { cancelled = true; };
-  }, []);
+  }, [countryCode]);
 
   useEffect(() => {
     if (!audioRef.current) {

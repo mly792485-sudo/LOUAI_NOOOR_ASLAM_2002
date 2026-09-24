@@ -23,8 +23,17 @@ app.get('/health', (_req, res) => {
 // Keep OPENAI_API_KEY on the server and allow the compiled mobile app to call
 // the API over HTTPS. APP_URL should be set to the deployed app/API origin.
 app.use((req, res, next) => {
-  const allowedOrigin = process.env.APP_URL || '*';
+  const configuredOrigins = (process.env.APP_URL || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  const requestOrigin = req.headers.origin || '';
+  const nativeOrigin = /^(capacitor|ionic|http):\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(requestOrigin);
+  const allowedOrigin = configuredOrigins.length === 0 || configuredOrigins.includes(requestOrigin) || nativeOrigin
+    ? (requestOrigin || '*')
+    : configuredOrigins[0];
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(204);

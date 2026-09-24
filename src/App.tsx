@@ -1408,7 +1408,10 @@ export default function App() {
                 <div className="space-y-4 sm:space-y-8 lg:sticky lg:top-28 min-w-0">
                   
                   {/* Makkah Live Quran Radio Player */}
-                  <MakkahLiveRadioPlayer isEn={isEn} />
+                  <MakkahLiveRadioPlayer
+                    isEn={isEn}
+                    countryCode={findCountryAndCity(settings.country, settings.city).country.code}
+                  />
 
                   {/* Daily Worship Tracker Checklist ("مسار الطاعات اليومي") */}
                   <div className="bg-white dark:bg-[#0B1516] border border-[#EBE7DF] dark:border-[#132326] rounded-3xl sm:rounded-[2.5rem] p-4 sm:p-6 shadow-xs hover:shadow-sm transition-all">

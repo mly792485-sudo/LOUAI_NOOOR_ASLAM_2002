@@ -85,7 +85,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
         throw new Error('ASSISTANT_SERVICE_UNAVAILABLE');
       }
 
-      const response = await fetch(`${apiBaseUrl}/api/ai/qa/stream`, {
+      let response = await fetch(`${apiBaseUrl}/api/ai/qa/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: textToSend }),
@@ -93,9 +93,25 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
       });
 
       if (!response.ok) {
+        // Some mobile WebViews or proxies do not support SSE correctly.
+        // Retry once through the ordinary JSON endpoint before showing an error.
+        const fallbackResponse = await fetch(`${apiBaseUrl}/api/ai/qa`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: textToSend }),
+          signal: controller.signal,
+        });
+        if (fallbackResponse.ok) {
+          const fallbackPayload = await fallbackResponse.json() as { text?: string };
+          const fallbackText = fallbackPayload.text?.trim() || '';
+          if (fallbackText) {
+            setMessages(prev => prev.map(msg => msg.id === assistantMsgId ? { ...msg, text: fallbackText } : msg));
+            return;
+          }
+        }
         let detail = '';
         try {
-          const errorPayload = await response.json();
+          const errorPayload = await fallbackResponse.json();
           detail = errorPayload.error || '';
         } catch {
           // Keep the user-facing error readable if the server returned HTML/text.
