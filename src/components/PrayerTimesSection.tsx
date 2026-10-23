@@ -27,6 +27,9 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
   const [countdownStr, setCountdownStr] = useState<string>('');
   const [hijriDateStr, setHijriDateStr] = useState<string>('');
   const [additionalTimes, setAdditionalTimes] = useState<Record<string, string | undefined>>({});
+  const [weekTimes, setWeekTimes] = useState<Array<{ date: Date; times: Record<string, string> }>>([]);
+  const [showWeek, setShowWeek] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sourceType, setSourceType] = useState<'bahrain-official' | 'api-bahrain-gulf' | 'api' | 'cached-api' | 'fallback'>('bahrain-official');
 
@@ -42,7 +45,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
     };
     return map[pName] || pName;
   };
-  
+
   // Todays prayer tracker checklist state
   const [todayChecklist, setTodayChecklist] = useState<PrayerStatus['prayers']>(() => {
     const todayStr = new Date().toISOString().split('T')[0];
@@ -70,17 +73,21 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
 
     const loadTimes = async () => {
       setIsLoading(true);
-      const res = await getAccuratePrayerTimes(
-        selectedCountry,
-        selectedCity,
-        settings.calculationMethod,
-        new Date(),
-        settings.latitude != null && settings.longitude != null
-          ? { latitude: settings.latitude, longitude: settings.longitude }
-          : undefined,
-        settings.madhhab || 'standard',
-        settings.prayerOffsets || {},
-      );
+      setLoadError(null);
+      const coordinates = settings.latitude != null && settings.longitude != null
+        ? { latitude: settings.latitude, longitude: settings.longitude }
+        : undefined;
+      const todayDate = new Date();
+      let res;
+      try {
+        res = await getAccuratePrayerTimes(selectedCountry, selectedCity, settings.calculationMethod, todayDate, coordinates, settings.madhhab || 'standard', settings.prayerOffsets || {});
+      } catch (error) {
+        if (isMounted) {
+          setLoadError(error instanceof Error ? error.message : 'تعذر تحميل مواقيت الصلاة');
+          setIsLoading(false);
+        }
+        return;
+      }
       if (!isMounted) return;
 
       if (res.hijriDate) {
@@ -92,7 +99,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
 
       const times = res.times;
       setAdditionalTimes(res.additionalTimes || {});
-      const today = new Date();
+      const today = todayDate;
 
       const computedPrayers = [
         { name: 'Fajr', arabicName: 'الفجر', time: times.Fajr },
@@ -115,7 +122,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
         const [pHStr, pMStr] = p.time.split(':');
         const pSeconds = parseInt(pHStr) * 3600 + parseInt(pMStr) * 60;
         const isPassed = nowInSeconds > pSeconds;
-        
+
         return {
           ...p,
           isPassed,
@@ -150,9 +157,9 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
         const [pHStr, pMStr] = nextP.time.split(':');
         let targetHours = parseInt(pHStr);
         const targetMinutes = parseInt(pMStr);
-        
+
         let targetDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), targetHours, targetMinutes, 0);
-        
+
         // If it's Fajr of tomorrow
         if (!foundNext) {
           targetDate.setDate(targetDate.getDate() + 1);
@@ -170,6 +177,22 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
       }
 
       setIsLoading(false);
+
+      // The weekly view uses the same API, coordinates, method, madhhab, and
+      // offsets as today. It therefore changes automatically with the season,
+      // Ramadan, travel, and daylight-saving rules instead of copying fixed times.
+      const days = await Promise.all(Array.from({ length: 7 }, async (_, index) => {
+        const date = new Date(todayDate);
+        date.setHours(12, 0, 0, 0);
+        date.setDate(date.getDate() + index);
+        try {
+          const day = await getAccuratePrayerTimes(selectedCountry, selectedCity, settings.calculationMethod, date, coordinates, settings.madhhab || 'standard', settings.prayerOffsets || {});
+          return { date, times: day.times };
+        } catch {
+          return null;
+        }
+      }));
+      if (isMounted) setWeekTimes(days.filter((day): day is { date: Date; times: Record<string, string> } => Boolean(day)));
     };
 
     loadTimes();
@@ -177,7 +200,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
     return () => {
       isMounted = false;
     };
-  }, [selectedCountry, selectedCity, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.latitude, settings.longitude, currentTime.getMinutes()]);
+  }, [selectedCountry, selectedCity, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.latitude, settings.longitude, currentTime.toDateString()]);
 
   // Keep the visible countdown moving every second without reloading prayer data.
   useEffect(() => {
@@ -218,7 +241,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
       [key]: !todayChecklist[key]
     };
     setTodayChecklist(updated);
-    
+
     const todayStr = new Date().toISOString().split('T')[0];
     safeStorage.setItem(`prayer_checklist_${todayStr}`, JSON.stringify(updated));
 
@@ -246,7 +269,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
 
   return (
     <div className="w-full bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 rounded-3xl p-5 md:p-6 space-y-6 text-right font-sans shadow-xs">
-      
+
       {/* Header with Country & City Selection */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800/40">
         <div className="flex items-center gap-2">
@@ -288,7 +311,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
             </span>
           </span>
         </div>
-        
+
         {/* Country & City Dropdowns */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-50 dark:bg-slate-950 p-2 rounded-2xl border border-slate-200/60 dark:border-slate-800/60">
           <div className="flex items-center gap-1.5 flex-1 min-w-0 px-2 py-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
@@ -327,9 +350,42 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
           )}
         </div>
       </div>
+        <div className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200/70 bg-slate-50 p-2 dark:border-slate-800 dark:bg-slate-950">
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            {isEn ? 'Daily schedule updates automatically with your location and date.' : 'تتغير المواقيت تلقائيًا حسب موقعك وتاريخ اليوم.'}
+          </span>
+          <button type="button" onClick={() => setShowWeek((value) => !value)} className="shrink-0 rounded-xl bg-emerald-700 px-3 py-2 text-xs font-black text-white">
+            {showWeek ? (isEn ? 'Today' : 'اليوم') : (isEn ? '7-day view' : 'الأسبوع')}
+          </button>
+        </div>
+
+        {loadError && (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-right text-xs font-bold text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
+            {loadError}
+          </div>
+        )}
+
+        {showWeek && weekTimes.length > 0 && (
+          <div className="overflow-x-auto rounded-2xl border border-emerald-100 dark:border-slate-800">
+            <div className="min-w-[680px] grid grid-cols-7 gap-px bg-emerald-100 dark:bg-slate-800">
+              {weekTimes.map(({ date, times }) => (
+                <div key={date.toISOString()} className="bg-white p-2 text-center dark:bg-slate-900">
+                  <div className="mb-2 text-[10px] font-black text-emerald-700 dark:text-emerald-300">{date.toLocaleDateString(isEn ? 'en-US' : 'ar-SA', { weekday: 'short', day: 'numeric', month: 'short' })}</div>
+                  {(['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const).map((name) => (
+                    <div key={name} className="flex items-center justify-between gap-1 border-t border-slate-100 py-1 text-[10px] dark:border-slate-800">
+                      <span className="font-bold text-slate-500">{getPrayerDisplayName(name, ({ Fajr: 'الفجر', Dhuhr: 'الظهر', Asr: 'العصر', Maghrib: 'المغرب', Isha: 'العشاء' } as Record<string, string>)[name])}</span>
+                      <span className="font-mono font-black text-slate-800 dark:text-slate-100">{formatTime12(times[name], isEn)}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
+
         {/* Remaining Timer Widget (Left / spans 5 cols) */}
         <div className="lg:col-span-5 bg-gradient-to-br from-emerald-800 to-teal-900 text-white rounded-3xl p-5 flex flex-col justify-between items-center text-center shadow-lg relative overflow-hidden">
           {/* Decorative geometric star */}
@@ -438,13 +494,13 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-sm shrink-0 ${
-                      p.isNext 
-                        ? 'bg-emerald-600 text-white shadow-xs' 
+                      p.isNext
+                        ? 'bg-emerald-600 text-white shadow-xs'
                         : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
                     }`}>
                       {displayName[0]}
                     </div>
-                    
+
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
                         <span className={`text-sm font-black ${p.isNext ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'}`}>
@@ -490,8 +546,8 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
                       >
                         <CheckCircle2 className="w-4 h-4" />
                         <span>
-                          {isChecked 
-                            ? (isEn ? 'Prayed (Completed)' : 'أديتها (تم التوثيق)') 
+                          {isChecked
+                            ? (isEn ? 'Prayed (Completed)' : 'أديتها (تم التوثيق)')
                             : (isEn ? 'Mark as Prayed' : 'تحديد كـ أُدّيت')}
                         </span>
                       </button>
