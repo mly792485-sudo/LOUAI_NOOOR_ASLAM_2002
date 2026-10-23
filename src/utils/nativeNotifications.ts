@@ -331,41 +331,42 @@ export const scheduleAllNativeNotifications = async (
         if (!prayer.time) return;
         const [pHour, pMin] = prayer.time.split(":").map(Number);
 
-        // At prayer time: a silent text reminder only. Sunrise is never included.
+        // Exactly two prayer alerts: adhan at the real prayer time and iqama later.
+        // The old implementation sent a silent alert at the prayer time and then
+        // delayed the adhan by five minutes, which was incorrect.
         if (prayer.name !== "Sunrise" && settings.adhanReminder) {
           const exactTime = new Date(targetDate);
           exactTime.setHours(pHour, pMin, 0, 0);
 
           if (exactTime.getTime() > Date.now()) {
+            const adhanData = getAdhanNotification(prayer.name, prayer.arabicName);
             notificationsToSchedule.push({
               id: notifIdCounter++,
-              title: `حان وقت صلاة ${prayer.arabicName}`,
-              body: `حان الآن وقت صلاة ${prayer.arabicName}. تقبل الله طاعتكم. سيبدأ الأذان بعد 5 دقائق.`,
-              schedule: { at: exactTime , allowWhileIdle: true, isExactNotification: true },
-              channelId: "prayer_time_silent_v1",
+              title: adhanData.title,
+              body: `حان الآن وقت صلاة ${prayer.arabicName}. بدأ الأذان، حيّ على الصلاة، حيّ على الفلاح.`,
+              schedule: { at: exactTime, allowWhileIdle: true, isExactNotification: true },
+              sound: adhanSoundFile,
+              channelId: "prayer_channel_audio_v6",
               iconColor: "#10b981",
-              actionTypeId: "PRAYER_ALERT_ACTIONS",
-              extra: {
-                prayer: prayer.name,
-                type: "prayer_time",
-              },
+              actionTypeId: "ADHAN_ACTIONS",
+              extra: { prayer: prayer.name, type: "adhan", voice: settings.selectedAdhanVoice },
             });
 
-            // Play the authentic bundled recording five minutes after the time reminder.
-            const adhanTime = new Date(exactTime.getTime() + 5 * 60 * 1000);
-            if (adhanTime.getTime() > Date.now()) {
-              const adhanData = getAdhanNotification(prayer.name, prayer.arabicName);
-              notificationsToSchedule.push({
-                id: notifIdCounter++,
-                title: adhanData.title,
-                body: `بدأ الآن أذان صلاة ${prayer.arabicName}. حيّ على الصلاة، حيّ على الفلاح.`,
-                schedule: { at: adhanTime, allowWhileIdle: true, isExactNotification: true },
-                sound: adhanSoundFile,
-                channelId: "prayer_channel_audio_v6",
-                iconColor: "#10b981",
-                actionTypeId: "ADHAN_ACTIONS",
-                extra: { prayer: prayer.name, type: "adhan", voice: settings.selectedAdhanVoice },
-              });
+            if (settings.iqamaReminder !== false) {
+              const iqamaTime = new Date(exactTime.getTime() + (settings.iqamaMinutes ?? 10) * 60 * 1000);
+              if (iqamaTime.getTime() > Date.now()) {
+                notificationsToSchedule.push({
+                  id: notifIdCounter++,
+                  title: `حان وقت إقامة صلاة ${prayer.arabicName}`,
+                  body: `أقيمت الصلاة. توجه إلى المسجد وأدِّ صلاة ${prayer.arabicName}.`,
+                  schedule: { at: iqamaTime, allowWhileIdle: true, isExactNotification: true },
+                  sound: adhanSoundFile,
+                  channelId: "prayer_channel_audio_v6",
+                  iconColor: "#f59e0b",
+                  actionTypeId: "PRAYER_ALERT_ACTIONS",
+                  extra: { prayer: prayer.name, type: "iqama", minutesAfterAdhan: settings.iqamaMinutes ?? 10 },
+                });
+              }
             }
           }
         }

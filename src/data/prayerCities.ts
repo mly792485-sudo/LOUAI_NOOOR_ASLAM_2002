@@ -415,26 +415,15 @@ export async function getAccuratePrayerTimes(
 ) {
   const { country, city } = findCountryAndCity(countryName, cityName);
 
-  // Bahrain must always use the Bahrain/Zubarah official profile, even when
-  // GPS coordinates are available. The generic coordinate calculation caused
-  // differences for Riffa and other Bahrain cities.
-  if (country.code === 'BH' && (method === 'BahrainOfficial' || method === 'GulfRegion' || Boolean(coordinates))) {
-    return {
-      source: 'bahrain-official-zubarah-profile',
-      sourceUrl: BAHRAIN_OFFICIAL_SOURCE_URL,
-      country: country.ar,
-      city: city.ar,
-      hijriDate: getHijriDate(date),
-      times: applyLocalOffsets(calculateBahrainOfficialTimes(date), offsets),
-    };
-  }
-
-  const methodId = METHOD_IDS[method] || 4;
+  // Bahrain previously returned a local approximation here. That approximation
+  // caused the reported 5–10 minute drift, so Bahrain now uses the coordinate
+  // API with the Gulf Region method and the same cache path as other countries.
+  const methodId = country.code === 'BH' ? METHOD_IDS.GulfRegion : (METHOD_IDS[method] || 4);
   const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`);
   try {
     const datePath = formatApiDate(date);
     const endpoint = coordinates
-      ? `https://api.aladhan.com/v1/timings/${datePath}?latitude=${encodeURIComponent(coordinates.latitude)}&longitude=${encodeURIComponent(coordinates.longitude)}&method=${method === 'BahrainOfficial' ? 8 : methodId}&school=${madhhab === 'hanafi' ? 1 : 0}`
+      ? `https://api.aladhan.com/v1/timings/${datePath}?latitude=${encodeURIComponent(coordinates.latitude)}&longitude=${encodeURIComponent(coordinates.longitude)}&method=${methodId}&school=${madhhab === 'hanafi' ? 1 : 0}`
       : `https://api.aladhan.com/v1/timingsByCity/${datePath}?city=${encodeURIComponent(city.en)}&country=${encodeURIComponent(country.en)}&method=${methodId}&school=${madhhab === 'hanafi' ? 1 : 0}`;
     const controller = new AbortController();
     const timeout = globalThis.setTimeout(() => controller.abort(), 8000);
@@ -444,18 +433,23 @@ export async function getAccuratePrayerTimes(
       const json = await res.json();
       if (json && json.data && json.data.timings) {
         const t = json.data.timings;
+        const requiredTimes = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        if (!requiredTimes.every((name) => typeof t[name] === 'string' && /^\d{2}:\d{2}/.test(t[name]))) {
+          throw new Error('Prayer API returned an incomplete schedule');
+        }
         const result = {
-          source: 'api',
+          source: country.code === 'BH' ? 'api-bahrain-gulf' : 'api',
+          sourceUrl: endpoint,
           country: country.ar,
           city: coordinates ? 'موقعك الحالي' : city.ar,
           hijriDate: json.data.date?.hijri ? `${json.data.date.hijri.day} ${json.data.date.hijri.month.ar} ${json.data.date.hijri.year} هـ` : getHijriDate(date),
           times: {
-            Fajr: t.Fajr?.substring(0, 5) || city.baseTimes.Fajr,
-            Sunrise: t.Sunrise?.substring(0, 5) || city.baseTimes.Sunrise,
-            Dhuhr: t.Dhuhr?.substring(0, 5) || city.baseTimes.Dhuhr,
-            Asr: t.Asr?.substring(0, 5) || city.baseTimes.Asr,
-            Maghrib: t.Maghrib?.substring(0, 5) || city.baseTimes.Maghrib,
-            Isha: t.Isha?.substring(0, 5) || city.baseTimes.Isha,
+            Fajr: t.Fajr.substring(0, 5),
+            Sunrise: t.Sunrise.substring(0, 5),
+            Dhuhr: t.Dhuhr.substring(0, 5),
+            Asr: t.Asr.substring(0, 5),
+            Maghrib: t.Maghrib.substring(0, 5),
+            Isha: t.Isha.substring(0, 5),
           },
         };
         result.times = applyLocalOffsets(result.times, offsets) as typeof result.times;
@@ -464,7 +458,7 @@ export async function getAccuratePrayerTimes(
       }
     }
   } catch (err) {
-    console.log('Aladhan API offline or unreachable, using seasonal calculation fallback', err);
+    console.warn('Prayer API offline or unreachable; trying cached data only', err);
   }
 
   const cached = readCachedPrayerTimes(cacheKey);
@@ -472,29 +466,5 @@ export async function getAccuratePrayerTimes(
     return { ...cached, source: 'cached-api' };
   }
 
-  // Fallback calculation for non-Bahrain cities when the API is unavailable.
-  const start = new Date(date.getFullYear(), 0, 0);
-  const diff = date.getTime() - start.getTime();
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  const seasonalShift = Math.round(15 * Math.sin((dayOfYear + 80) * 2 * Math.PI / 365));
-  const formatAndShift = (timeStr: string, shiftMins: number) => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    return formatMinutes(hours * 60 + minutes + shiftMins);
-  };
-  const base = city.baseTimes;
-  return {
-    source: 'fallback',
-    country: country.ar,
-    city: city.ar,
-    hijriDate: getHijriDate(date),
-    times: {
-      Fajr: formatMinutes(Number(base.Fajr.split(':')[0]) * 60 + Number(base.Fajr.split(':')[1]) + seasonalShift + Number(offsets.Fajr || 0)),
-      Sunrise: formatMinutes(Number(base.Sunrise.split(':')[0]) * 60 + Number(base.Sunrise.split(':')[1]) + seasonalShift - 3 + Number(offsets.Sunrise || 0)),
-      Dhuhr: formatMinutes(Number(base.Dhuhr.split(':')[0]) * 60 + Number(base.Dhuhr.split(':')[1]) + seasonalShift + 2 + Number(offsets.Dhuhr || 0)),
-      Asr: formatMinutes(Number(base.Asr.split(':')[0]) * 60 + Number(base.Asr.split(':')[1]) + seasonalShift + 5 + Number(offsets.Asr || 0)),
-      Maghrib: formatMinutes(Number(base.Maghrib.split(':')[0]) * 60 + Number(base.Maghrib.split(':')[1]) + seasonalShift + 2 + Number(offsets.Maghrib || 0)),
-      Isha: formatMinutes(Number(base.Isha.split(':')[0]) * 60 + Number(base.Isha.split(':')[1]) + seasonalShift + 1 + Number(offsets.Isha || 0)),
-    },
-  };
+  throw new Error('لا توجد مواقيت موثوقة لهذا اليوم. اتصل بالإنترنت ثم أعد المحاولة.');
 }

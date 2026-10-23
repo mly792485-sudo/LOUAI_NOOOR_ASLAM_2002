@@ -27,7 +27,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
   const [countdownStr, setCountdownStr] = useState<string>('');
   const [hijriDateStr, setHijriDateStr] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [sourceType, setSourceType] = useState<'bahrain-official' | 'api' | 'cached-api' | 'fallback'>('bahrain-official');
+  const [sourceType, setSourceType] = useState<'bahrain-official' | 'api-bahrain-gulf' | 'api' | 'cached-api' | 'fallback'>('bahrain-official');
 
   const getPrayerDisplayName = (pName: string, arName: string) => {
     if (!isEn) return arName;
@@ -87,7 +87,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
       } else {
         setHijriDateStr('');
       }
-      setSourceType(res.source as 'bahrain-official' | 'api' | 'cached-api' | 'fallback');
+      setSourceType(res.source as 'bahrain-official' | 'api-bahrain-gulf' | 'api' | 'cached-api' | 'fallback');
 
       const times = res.times;
       const today = new Date();
@@ -270,7 +270,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border text-[10px] font-extrabold ${
             sourceType === 'bahrain-official'
               ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60'
-              : sourceType === 'api' || sourceType === 'cached-api'
+              : sourceType === 'api-bahrain-gulf' || sourceType === 'api' || sourceType === 'cached-api'
                 ? 'bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60'
                 : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800'
           }`}>
@@ -278,8 +278,8 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
             <span>
               {sourceType === 'bahrain-official'
                 ? (isEn ? 'Bahrain Official Calendar' : 'التقويم البحريني الرسمي')
-                : sourceType === 'api' || sourceType === 'cached-api'
-                  ? (isEn ? (sourceType === 'cached-api' ? 'Cached AlAdhan times' : 'AlAdhan API') : (sourceType === 'cached-api' ? 'آخر مواقيت محفوظة' : 'مصدر المواقيت API'))
+                : sourceType === 'api-bahrain-gulf' || sourceType === 'api' || sourceType === 'cached-api'
+                  ? (isEn ? (sourceType === 'cached-api' ? 'Cached AlAdhan times' : sourceType === 'api-bahrain-gulf' ? 'Bahrain / Gulf API' : 'AlAdhan API') : (sourceType === 'cached-api' ? 'آخر مواقيت محفوظة' : sourceType === 'api-bahrain-gulf' ? 'مواقيت البحرين عبر API الخليج' : 'مصدر المواقيت API'))
                   : (isEn ? 'Offline fallback' : 'الحساب المحلي الاحتياطي')}
             </span>
           </span>

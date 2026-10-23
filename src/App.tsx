@@ -125,6 +125,7 @@ export default function App() {
     tip: string;
   } | null>(null);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [livePrayerTimes, setLivePrayerTimes] = useState<Record<string, string> | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [showShareToast, setShowShareToast] = useState<boolean>(false);
   const [isLandscape, setIsLandscape] = useState<boolean>(false);
@@ -413,6 +414,7 @@ export default function App() {
           settings.madhhab || 'standard',
           settings.prayerOffsets || {},
         );
+        if (dayOffset === 0) setLivePrayerTimes(res.times);
         scheduleDays.push({
           date: day,
           prayers: prayerNames.map(([name, arabicName]) => ({
@@ -909,41 +911,22 @@ export default function App() {
     setQuoteIndex(prev => (prev + 1) % CURATED_INSPIRATIONS.length);
   }, []);
 
-  // Compute standard day prayer times
+  // The home countdown uses the exact same API result used by notifications.
+  // It falls back only during the first loading frame; it never applies a
+  // seasonal shift or a second prayer-time calculation.
   const computedPrayers = useMemo(() => {
     const { city } = findCountryAndCity(settings.country, settings.city);
-    const base = city.baseTimes;
-    const today = new Date();
-    const start = new Date(today.getFullYear(), 0, 0);
-    const diff = today.getTime() - start.getTime();
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-    const seasonalShift = Math.round(20 * Math.sin((dayOfYear + 80) * 2 * Math.PI / 365));
-
-    const formatAndShift = (timeStr: string, shiftMins: number) => {
-      const [hStr, mStr] = timeStr.split(':');
-      let h = parseInt(hStr);
-      let m = parseInt(mStr) + shiftMins;
-      if (m >= 60) {
-        h += Math.floor(m / 60);
-        m = m % 60;
-      } else if (m < 0) {
-        h -= Math.ceil(Math.abs(m) / 60);
-        m = 60 - (Math.abs(m) % 60);
-      }
-      h = (h + 24) % 24;
-      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    };
-
+    const times = livePrayerTimes || city.baseTimes;
+    const name = (ar: string, en: string) => isEn ? en : ar;
     return [
-      { name: 'Fajr', arabic: isEn ? 'Fajr' : 'الفجر', arabicName: isEn ? 'Fajr' : 'الفجر', time: formatAndShift(base.Fajr, seasonalShift), isPassed: false, isNext: false },
-      { name: 'Sunrise', arabic: isEn ? 'Sunrise' : 'الشروق', arabicName: isEn ? 'Sunrise' : 'الشروق', time: formatAndShift(base.Sunrise, seasonalShift - 5), isPassed: false, isNext: false },
-      { name: 'Dhuhr', arabic: isEn ? 'Dhuhr' : 'الظهر', arabicName: isEn ? 'Dhuhr' : 'الظهر', time: formatAndShift(base.Dhuhr, seasonalShift + 3), isPassed: false, isNext: false },
-      { name: 'Asr', arabic: isEn ? 'Asr' : 'العصر', arabicName: isEn ? 'Asr' : 'العصر', time: formatAndShift(base.Asr, seasonalShift + 8), isPassed: false, isNext: false },
-      { name: 'Maghrib', arabic: isEn ? 'Maghrib' : 'المغرب', arabicName: isEn ? 'Maghrib' : 'المغرب', time: formatAndShift(base.Maghrib, seasonalShift + 2), isPassed: false, isNext: false },
-      { name: 'Isha', arabic: isEn ? 'Isha' : 'العشاء', arabicName: isEn ? 'Isha' : 'العشاء', time: formatAndShift(base.Isha, seasonalShift + 1), isPassed: false, isNext: false },
+      { name: 'Fajr', arabic: name('الفجر', 'Fajr'), arabicName: name('الفجر', 'Fajr'), time: times.Fajr, isPassed: false, isNext: false },
+      { name: 'Sunrise', arabic: name('الشروق', 'Sunrise'), arabicName: name('الشروق', 'Sunrise'), time: times.Sunrise, isPassed: false, isNext: false },
+      { name: 'Dhuhr', arabic: name('الظهر', 'Dhuhr'), arabicName: name('الظهر', 'Dhuhr'), time: times.Dhuhr, isPassed: false, isNext: false },
+      { name: 'Asr', arabic: name('العصر', 'Asr'), arabicName: name('العصر', 'Asr'), time: times.Asr, isPassed: false, isNext: false },
+      { name: 'Maghrib', arabic: name('المغرب', 'Maghrib'), arabicName: name('المغرب', 'Maghrib'), time: times.Maghrib, isPassed: false, isNext: false },
+      { name: 'Isha', arabic: name('العشاء', 'Isha'), arabicName: name('العشاء', 'Isha'), time: times.Isha, isPassed: false, isNext: false },
     ];
-  }, [settings.country, settings.city, isEn]);
+  }, [settings.country, settings.city, isEn, livePrayerTimes]);
 
   // Calculate Next Prayer countdown with live seconds & progress
   const getNextPrayerInfo = useCallback(() => {
