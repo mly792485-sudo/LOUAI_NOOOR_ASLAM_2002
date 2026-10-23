@@ -99,12 +99,24 @@ jobs:
           retention-days: 14
 
       - name: Upload unsigned IPA package
+        id: upload-ipa
         uses: actions/upload-artifact@v4
         with:
           name: noor-al-islam-ios-ipa-unsigned
           path: ${{ runner.temp }}/NoorAlIslam-unsigned.ipa
           if-no-files-found: error
           retention-days: 14
+
+      - name: Show IPA download link
+        if: ${{ success() }}
+        run: |
+          {
+            echo '## iOS download'
+            echo ''
+            echo 'The IPA below is unsigned and is for build verification only.'
+            echo ''
+            echo '[Download NoorAlIslam-unsigned.ipa artifact](${{ steps.upload-ipa.outputs.artifact-url }})'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Xcode build log
         uses: actions/upload-artifact@v4
