@@ -197,13 +197,15 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
     const countryObj = PRAYER_COUNTRIES.find(c => c.ar === countryName) || PRAYER_COUNTRIES[0];
     const defaultCity = countryObj.cities[0].ar;
     setSelectedCity(defaultCity);
-    onUpdateSettings({ ...settings, country: countryName, city: defaultCity });
+    // A manual selection must not keep GPS coordinates from the previous
+    // country; otherwise the API would continue calculating the old location.
+    onUpdateSettings({ ...settings, country: countryName, city: defaultCity, latitude: null, longitude: null });
   };
 
   // Handle City Selection
   const handleCityChange = (cityName: string) => {
     setSelectedCity(cityName);
-    onUpdateSettings({ ...settings, country: selectedCountry, city: cityName });
+    onUpdateSettings({ ...settings, country: selectedCountry, city: cityName, latitude: null, longitude: null });
   };
 
   // Persist prayer tracker checkoffs

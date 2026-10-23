@@ -416,9 +416,10 @@ export async function getAccuratePrayerTimes(
   const { country, city } = findCountryAndCity(countryName, cityName);
 
   // Bahrain previously returned a local approximation here. That approximation
-  // caused the reported 5–10 minute drift, so Bahrain now uses the coordinate
-  // API with the Gulf Region method and the same cache path as other countries.
-  const methodId = country.code === 'BH' ? METHOD_IDS.GulfRegion : (METHOD_IDS[method] || 4);
+  // caused the reported 5–10 minute drift. BahrainOfficial now means the Gulf
+  // API profile only; other countries keep their own configured calculation
+  // method, so travelling to Egypt or Saudi Arabia does not use Bahrain rules.
+  const methodId = method === 'BahrainOfficial' ? METHOD_IDS.GulfRegion : (METHOD_IDS[method] || 4);
   const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`);
   try {
     const datePath = formatApiDate(date);

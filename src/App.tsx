@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 
 import { AppSettings } from './types';
-import { getAccuratePrayerTimes, findCountryAndCity } from './data/prayerCities';
+import { getAccuratePrayerTimes, findCountryAndCity, PRAYER_COUNTRIES } from './data/prayerCities';
 import { formatTime12 } from './utils/formatTime';
 import SettingsModal from './components/SettingsModal';
 import QuranSection from './components/QuranSection';
@@ -720,33 +720,78 @@ export default function App() {
     checkInitialPermissions();
   }, []);
 
-  // First-run onboarding: request notifications, then precise location for prayer times and Qibla.
+  // Keep the prayer location current. A one-time GPS request is not enough:
+  // users may travel, cross a timezone, or open the app during Ramadan after
+  // the calendar day has changed. The API is queried again with fresh coords.
   useEffect(() => {
     let cancelled = false;
-    const requestFirstRunPermissions = async () => {
+    const methodForCountry = (code?: string, previous = settings.calculationMethod): AppSettings['calculationMethod'] => {
+      switch (code?.toUpperCase()) {
+        case 'BH': return 'BahrainOfficial';
+        case 'SA': return 'UmmAlQura';
+        case 'EG': return 'Egypt';
+        case 'AE':
+        case 'QA':
+        case 'KW':
+        case 'OM': return 'GulfRegion';
+        default: return previous === 'BahrainOfficial' ? 'GulfRegion' : previous;
+      }
+    };
+
+    const refreshLocation = async (requestPermission: boolean) => {
       try {
-        await requestAllPermissions();
-        if (cancelled || (settings.latitude != null && settings.longitude != null)) return;
-        const permission = await Geolocation.requestPermissions();
+        let permission = await Geolocation.checkPermissions();
+        if (requestPermission && permission.location !== 'granted') {
+          permission = await Geolocation.requestPermissions();
+        }
         if (cancelled || permission.location !== 'granted') return;
         const position = await Geolocation.getCurrentPosition({
           enableHighAccuracy: true,
           timeout: 15000,
-          maximumAge: 300000,
+          maximumAge: 900000,
         });
         if (cancelled) return;
+        const { latitude, longitude } = position.coords;
+        let country: string | undefined;
+        let city: string | undefined;
+        let countryCode: string | undefined;
+        try {
+          const reverse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}&zoom=10&accept-language=ar`, {
+            headers: { Accept: 'application/json' },
+          });
+          if (reverse.ok) {
+            const address = (await reverse.json())?.address || {};
+            countryCode = address.country_code?.toUpperCase();
+            const matched = PRAYER_COUNTRIES.find((item) => item.code === countryCode);
+            country = matched?.ar;
+            city = matched?.cities.find((item) => [address.city, address.town, address.municipality, address.state].includes(item.ar) || [address.city, address.town, address.municipality, address.state].includes(item.en))?.ar;
+          }
+        } catch (error) {
+          console.warn('تعذر تحديد الدولة من الموقع، ستستخدم الإحداثيات الحالية:', error);
+        }
         setSettings((previous) => ({
           ...previous,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          city: 'موقعك الحالي',
+          latitude,
+          longitude,
+          ...(country ? { country } : {}),
+          ...(city ? { city } : { city: 'موقعك الحالي' }),
+          calculationMethod: methodForCountry(countryCode, previous.calculationMethod),
         }));
       } catch (error) {
         console.warn('تعذر الحصول على موقع المستخدم:', error);
       }
     };
-    void requestFirstRunPermissions();
-    return () => { cancelled = true; };
+
+    void requestAllPermissions();
+    void refreshLocation(true);
+    const refreshTimer = window.setInterval(() => { void refreshLocation(false); }, 30 * 60 * 1000);
+    const onVisible = () => { if (document.visibilityState === 'visible') void refreshLocation(false); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      cancelled = true;
+      window.clearInterval(refreshTimer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
   // Quick electronic Tasbih state
