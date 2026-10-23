@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   JAVA_VERSION: '21'
@@ -90,3 +90,18 @@ jobs:
           path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish direct Android download release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: noor-android-build-${{ github.run_number }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            android/app/build/outputs/apk/release/app-release-unsigned.apk \
+            android/app/build/outputs/bundle/release/app-release.aab \
+            --title "Noor Al-Islam Android build ${{ github.run_number }}" \
+            --notes "Debug APK, unsigned release APK, and unsigned AAB. App Store/Google Play signing is required for production distribution." \
+            --latest=false
+          echo '### Direct Android downloads' >> "$GITHUB_STEP_SUMMARY"
+          echo "[Open the Android release page](https://github.com/${{ github.repository }}/releases/tag/$RELEASE_TAG)" >> "$GITHUB_STEP_SUMMARY"

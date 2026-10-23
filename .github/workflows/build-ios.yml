@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   NODE_VERSION: '22'
@@ -117,6 +117,19 @@ jobs:
             echo ''
             echo '[Download NoorAlIslam-unsigned.ipa artifact](${{ steps.upload-ipa.outputs.artifact-url }})'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish direct iOS download release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: noor-ios-build-${{ github.run_number }}
+        run: |
+          gh release create "$RELEASE_TAG" "$RUNNER_TEMP/NoorAlIslam-unsigned.ipa" \
+            --title "Noor Al-Islam iOS build ${{ github.run_number }}" \
+            --notes "Unsigned IPA for testing only. It requires Apple signing before installation on a real iPhone." \
+            --latest=false
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo "### Direct release download" >> "$GITHUB_STEP_SUMMARY"
+          echo "[Open the iOS release page](https://github.com/${{ github.repository }}/releases/tag/$RELEASE_TAG)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Xcode build log
         uses: actions/upload-artifact@v4
