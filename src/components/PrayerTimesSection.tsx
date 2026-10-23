@@ -26,6 +26,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
   const [nextPrayer, setNextPrayer] = useState<PrayerTime | null>(null);
   const [countdownStr, setCountdownStr] = useState<string>('');
   const [hijriDateStr, setHijriDateStr] = useState<string>('');
+  const [additionalTimes, setAdditionalTimes] = useState<Record<string, string | undefined>>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sourceType, setSourceType] = useState<'bahrain-official' | 'api-bahrain-gulf' | 'api' | 'cached-api' | 'fallback'>('bahrain-official');
 
@@ -90,6 +91,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
       setSourceType(res.source as 'bahrain-official' | 'api-bahrain-gulf' | 'api' | 'cached-api' | 'fallback');
 
       const times = res.times;
+      setAdditionalTimes(res.additionalTimes || {});
       const today = new Date();
 
       const computedPrayers = [
@@ -405,6 +407,20 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
 
         {/* Timings List & Daily Checklist Tracker (Right / spans 7 cols) */}
         <div className="lg:col-span-7 space-y-4">
+          {(additionalTimes.Imsak || additionalTimes.Sunset || additionalTimes.Lastthird) && (
+            <div className="grid grid-cols-3 gap-2 rounded-2xl border border-amber-200/70 bg-amber-50/70 p-3 dark:border-amber-900/50 dark:bg-amber-950/20">
+              {[
+                ['Imsak', isEn ? 'Imsak' : 'الإمساك', additionalTimes.Imsak],
+                ['Sunset', isEn ? 'Iftar / Sunset' : 'الإفطار / الغروب', additionalTimes.Sunset],
+                ['Lastthird', isEn ? 'Last third' : 'الثلث الأخير', additionalTimes.Lastthird],
+              ].map(([key, label, value]) => value ? (
+                <div key={String(key)} className="text-center">
+                  <div className="text-[10px] font-bold text-amber-800 dark:text-amber-300">{label}</div>
+                  <div className="mt-1 font-mono text-sm font-black text-slate-800 dark:text-slate-100">{formatTime12(String(value), isEn)}</div>
+                </div>
+              ) : null)}
+            </div>
+          )}
           <div className="flex flex-col gap-2.5">
             {prayerList.map((p) => {
               const checklistKey = p.name.toLowerCase() as keyof typeof todayChecklist;

@@ -444,6 +444,13 @@ export async function getAccuratePrayerTimes(
           country: country.ar,
           city: coordinates ? 'موقعك الحالي' : city.ar,
           hijriDate: json.data.date?.hijri ? `${json.data.date.hijri.day} ${json.data.date.hijri.month.ar} ${json.data.date.hijri.year} هـ` : getHijriDate(date),
+          additionalTimes: {
+            Imsak: typeof t.Imsak === 'string' ? t.Imsak.substring(0, 5) : undefined,
+            Sunset: typeof t.Sunset === 'string' ? t.Sunset.substring(0, 5) : undefined,
+            Midnight: typeof t.Midnight === 'string' ? t.Midnight.substring(0, 5) : undefined,
+            Firstthird: typeof t.Firstthird === 'string' ? t.Firstthird.substring(0, 5) : undefined,
+            Lastthird: typeof t.Lastthird === 'string' ? t.Lastthird.substring(0, 5) : undefined,
+          },
           times: {
             Fajr: t.Fajr.substring(0, 5),
             Sunrise: t.Sunrise.substring(0, 5),
