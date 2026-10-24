@@ -386,8 +386,8 @@ const getHijriDate = (date: Date) => {
   }
 };
 
-const prayerCacheKey = (country: string, city: string, date: Date, method: string) =>
-  `noor-prayer-times-v2:${country}:${city}:${formatApiDate(date)}:${method}`;
+const prayerCacheKey = (country: string, city: string, date: Date, method: string, methodId: number) =>
+  `noor-prayer-times-v3:${country}:${city}:${formatApiDate(date)}:${method}:${methodId}`;
 
 const readCachedPrayerTimes = (key: string) => {
   try {
@@ -422,7 +422,7 @@ export async function getAccuratePrayerTimes(
   // Riffa comparison: method 4 returns Fajr 04:22 on 24 Oct 2026, instead of
   // method 8's 04:17. Other countries keep their own selected method.
   const methodId = method === 'BahrainOfficial' ? METHOD_IDS.UmmAlQura : (METHOD_IDS[method] || 4);
-  const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`);
+  const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`, methodId);
   try {
     const datePath = formatApiDate(date);
     const endpoint = coordinates
