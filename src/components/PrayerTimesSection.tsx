@@ -306,7 +306,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
               {sourceType === 'bahrain-official'
                 ? (isEn ? 'Bahrain Official Calendar' : 'التقويم البحريني الرسمي')
                 : sourceType === 'api-bahrain-gulf' || sourceType === 'api' || sourceType === 'cached-api'
-                  ? (isEn ? (sourceType === 'cached-api' ? 'Cached AlAdhan times' : sourceType === 'api-bahrain-gulf' ? 'Bahrain / Gulf API' : 'AlAdhan API') : (sourceType === 'cached-api' ? 'آخر مواقيت محفوظة' : sourceType === 'api-bahrain-gulf' ? 'مواقيت البحرين عبر API الخليج' : 'مصدر المواقيت API'))
+                  ? (isEn ? (sourceType === 'cached-api' ? 'Cached AlAdhan times' : sourceType === 'api-bahrain-gulf' ? 'Bahrain reference API' : 'AlAdhan API') : (sourceType === 'cached-api' ? 'آخر مواقيت محفوظة' : sourceType === 'api-bahrain-gulf' ? 'المواقيت المرجعية للبحرين عبر API' : 'مصدر المواقيت API'))
                   : (isEn ? 'Offline fallback' : 'الحساب المحلي الاحتياطي')}
             </span>
           </span>

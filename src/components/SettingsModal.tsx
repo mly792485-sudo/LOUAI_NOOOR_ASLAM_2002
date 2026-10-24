@@ -420,7 +420,7 @@ export default function SettingsModal({
                 onChange={changeMethod}
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-[#080E10] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                <option value="BahrainOfficial">{isEn ? "Bahrain Official Calendar (Zubarah)" : "التقويم البحريني الرسمي (روزنامة الزبارة)"}</option>
+                <option value="BahrainOfficial">{isEn ? "Bahrain local reference (Riffa-compatible)" : "الضبط البحريني المرجعي (مطابق للرفاع)"}</option>
                 <option value="GulfRegion">{isEn ? "Gulf Region (GCC)" : "منطقة الخليج العربي (دول الخليج)"}</option>
                 <option value="UmmAlQura">{isEn ? "Umm Al-Qura (Makkah)" : "جامعة أم القرى (مكة المكرمة)"}</option>
                 <option value="MWL">{isEn ? "Muslim World League" : "رابطة العالم الإسلامي"}</option>

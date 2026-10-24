@@ -242,7 +242,10 @@ export const PRAYER_COUNTRIES: CountryInfo[] = [
   }
 ];
 
-// Calculation Method ID for Aladhan API
+// Calculation Method ID for Aladhan API.
+// Bahrain's displayed local reference matches method 4 for Fajr/Isha
+// (Umm Al-Qura-compatible: Fajr 18.5°, Isha +90 minutes), while method 8
+// was producing the observed five-minute early Fajr in Riffa.
 export const METHOD_IDS: { [key: string]: number } = {
   Karachi: 1,
   UmmAlQura: 4,
@@ -415,11 +418,10 @@ export async function getAccuratePrayerTimes(
 ) {
   const { country, city } = findCountryAndCity(countryName, cityName);
 
-  // Bahrain previously returned a local approximation here. That approximation
-  // caused the reported 5–10 minute drift. BahrainOfficial now means the Gulf
-  // API profile only; other countries keep their own configured calculation
-  // method, so travelling to Egypt or Saudi Arabia does not use Bahrain rules.
-  const methodId = method === 'BahrainOfficial' ? METHOD_IDS.GulfRegion : (METHOD_IDS[method] || 4);
+  // BahrainOfficial uses the local reference profile that matches the user's
+  // Riffa comparison: method 4 returns Fajr 04:22 on 24 Oct 2026, instead of
+  // method 8's 04:17. Other countries keep their own selected method.
+  const methodId = method === 'BahrainOfficial' ? METHOD_IDS.UmmAlQura : (METHOD_IDS[method] || 4);
   const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`);
   try {
     const datePath = formatApiDate(date);
