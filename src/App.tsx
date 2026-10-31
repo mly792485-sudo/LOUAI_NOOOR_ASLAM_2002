@@ -434,7 +434,7 @@ export default function App() {
 
     loadAndSchedule().catch((error) => console.warn('تعذر جدولة الإشعارات المحلية:', error));
     return () => { cancelled = true; };
-  }, [settings.country, settings.city, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.latitude, settings.longitude, settings.adhanReminder, settings.azkarReminder, settings.prePrayerReminder, settings.preIqamaMinutes, settings.iqamaReminder, settings.fridayKahfReminder, settings.tahajjudReminder]);
+  }, [settings.country, settings.city, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.latitude, settings.longitude, settings.adhanReminder, settings.azkarReminder, settings.morningAzkarReminder, settings.eveningAzkarReminder, settings.prePrayerReminder, settings.prePrayerMinutes, settings.preIqamaMinutes, settings.iqamaReminder, settings.iqamaMinutes, settings.fridayKahfReminder, settings.tahajjudReminder]);
 
   // Daily Adhan & Prayer Times background checker
   useEffect(() => {

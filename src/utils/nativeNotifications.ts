@@ -376,7 +376,7 @@ export const scheduleAllNativeNotifications = async (
       // E. Sleep Azkar Notification (Every night at 09:32 PM)
       const sleepAzkarTime = new Date(targetDate);
       sleepAzkarTime.setHours(21, 32, 0, 0);
-      if (sleepAzkarTime.getTime() > Date.now()) {
+      if (settings.azkarReminder && sleepAzkarTime.getTime() > Date.now()) {
         notificationsToSchedule.push({
           id: notifIdCounter++,
           title: "أذكار النوم 🌙",
@@ -468,11 +468,20 @@ export const scheduleAllNativeNotifications = async (
     }
 
     if (notificationsToSchedule.length > 0) {
+      // iOS and some Android versions limit pending local notifications. Keep
+      // every prayer adhan/iqama pair first; optional adhkar reminders fill
+      // the remaining slots instead of silently removing later prayer days.
+      notificationsToSchedule.sort((a, b) => {
+        const aPrayer = a.extra?.type === "adhan" || a.extra?.type === "iqama" ? 0 : 1;
+        const bPrayer = b.extra?.type === "adhan" || b.extra?.type === "iqama" ? 0 : 1;
+        return aPrayer - bPrayer || new Date(a.schedule.at).getTime() - new Date(b.schedule.at).getTime();
+      });
+      const pendingSafeNotifications = notificationsToSchedule.slice(0, 60);
       await LocalNotifications.schedule({
-        notifications: notificationsToSchedule.slice(0, 60),
+        notifications: pendingSafeNotifications,
       });
       console.log(
-        `Successfully scheduled ${notificationsToSchedule.length} native rich lock-screen notifications.`,
+        `Successfully scheduled ${pendingSafeNotifications.length} native rich lock-screen notifications (${notificationsToSchedule.length} prepared before the device limit).`,
       );
     }
   } catch (error) {
