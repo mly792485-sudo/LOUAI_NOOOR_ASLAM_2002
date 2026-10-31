@@ -63,6 +63,8 @@ import EhsanIslamicPlatformSection from './components/EhsanIslamicPlatformSectio
 import WelcomeSplashScreen from './components/WelcomeSplashScreen';
 import MakkahLiveRadioPlayer from './components/MakkahLiveRadioPlayer';
 import UnifiedSearchFavoritesModal from './components/UnifiedSearchFavoritesModal';
+import DailyWorshipSection from './components/DailyWorshipSection';
+import IslamicCalendarSection from './components/IslamicCalendarSection';
 import { ISLAMIC_AVATARS } from './assets/avatars';
 import { requestAllPermissions, scheduleAllNativeNotifications, checkPermissionsStatus, NativePrayerScheduleDay } from './utils/nativeNotifications';
 import { playAdhanAudio, stopAdhanAudio, playPrePrayerChime } from './utils/adhanPlayer';
@@ -1105,6 +1107,26 @@ export default function App() {
           isEn={isEn} 
         />
       )
+    },
+    {
+      id: 'daily-worship',
+      title: isEn ? 'Daily Worship Center' : 'مركز العبادات اليومي',
+      desc: isEn ? 'Track prayer, adhkar, Quran, dhikr and good deeds in one private daily path' : 'تابع الصلاة والأذكار والقرآن والتسبيح والعمل الصالح في مسار يومي خاص',
+      icon: <Award className="w-6 h-6" />,
+      avatarUrl: ISLAMIC_AVATARS.tasbih,
+      colorClass: 'from-rose-600 to-amber-500',
+      bgLight: 'bg-rose-500/10 text-rose-800 border-rose-500/20',
+      component: <DailyWorshipSection isEn={isEn} />
+    },
+    {
+      id: 'islamic-calendar',
+      title: isEn ? 'Hijri Calendar & Occasions' : 'التقويم الهجري والمناسبات',
+      desc: isEn ? 'Follow the Hijri date, Ramadan, the two Eids and important occasions' : 'تابع التاريخ الهجري ورمضان والعيدين والمناسبات الإسلامية المهمة',
+      icon: <CalendarIcon className="w-6 h-6" />,
+      avatarUrl: ISLAMIC_AVATARS.khatma,
+      colorClass: 'from-indigo-700 to-sky-600',
+      bgLight: 'bg-indigo-500/10 text-indigo-800 border-indigo-500/20',
+      component: <IslamicCalendarSection isEn={isEn} />
     },
     {
       id: 'khatma',
