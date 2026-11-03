@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Award, BookOpen, CheckCircle2, Heart, Moon, Sparkles, Sunrise, Target } from 'lucide-react';
 import { safeStorage } from '../utils/safeStorage';
+import { localDateKey } from '../utils/localDateKey';
 
 type Goal = { id: string; ar: string; en: string; icon: React.ReactNode };
 
@@ -13,7 +14,7 @@ const GOALS: Goal[] = [
   { id: 'charity', ar: 'قدمت صدقة أو عملًا صالحًا', en: 'Gave charity or did a good deed', icon: <Award className="h-5 w-5" /> },
 ];
 
-const dayKey = () => new Date().toISOString().slice(0, 10);
+const dayKey = () => localDateKey();
 
 export default function DailyWorshipSection({ isEn = false }: { isEn?: boolean }) {
   const storageKey = `noor-daily-worship:${dayKey()}`;

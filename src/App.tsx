@@ -39,7 +39,8 @@ import {
   Search,
   Smartphone,
   RotateCw,
-  Library
+  Library,
+  Calculator
 } from 'lucide-react';
 
 import { AppSettings } from './types';
@@ -65,10 +66,12 @@ import MakkahLiveRadioPlayer from './components/MakkahLiveRadioPlayer';
 import UnifiedSearchFavoritesModal from './components/UnifiedSearchFavoritesModal';
 import DailyWorshipSection from './components/DailyWorshipSection';
 import IslamicCalendarSection from './components/IslamicCalendarSection';
+import ZakatCalculatorSection from './components/ZakatCalculatorSection';
 import { ISLAMIC_AVATARS } from './assets/avatars';
 import { requestAllPermissions, scheduleAllNativeNotifications, checkPermissionsStatus, NativePrayerScheduleDay } from './utils/nativeNotifications';
 import { playAdhanAudio, stopAdhanAudio, playPrePrayerChime } from './utils/adhanPlayer';
 import { safeStorage } from './utils/safeStorage';
+import { localDateKey } from './utils/localDateKey';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -327,7 +330,7 @@ export default function App() {
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const currentHHMM = `${hours}:${minutes}`;
-      const todayStr = now.toISOString().substring(0, 10); // "YYYY-MM-DD"
+      const todayStr = localDateKey(now); // "YYYY-MM-DD"
 
       // Load already triggered list
       const triggeredStored = safeStorage.getItem(triggeredKey);
@@ -470,7 +473,7 @@ export default function App() {
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const currentHHMM = `${hours}:${minutes}`;
-      const todayStr = now.toISOString().substring(0, 10); // "YYYY-MM-DD"
+      const todayStr = localDateKey(now); // "YYYY-MM-DD"
 
       // Load already triggered list
       const triggeredStored = safeStorage.getItem(triggeredKey);
@@ -659,7 +662,7 @@ export default function App() {
   // Persisted Daily Worship Tracker
   const [dailyPrayers, setDailyPrayers] = useState<{ [key: string]: boolean }>(() => {
     const saved = safeStorage.getItem('noor_daily_prayers_checked');
-    const todayStr = new Date().toISOString().substring(0, 10);
+    const todayStr = localDateKey();
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -817,7 +820,7 @@ export default function App() {
   // Daily open streak counter effect
   useEffect(() => {
     const lastOpen = safeStorage.getItem('noor_last_open_date');
-    const todayStr = new Date().toISOString().substring(0, 10);
+    const todayStr = localDateKey();
     const currentStreak = safeStorage.getItem('noor_streak_count');
     let streak = currentStreak ? parseInt(currentStreak, 10) : 1;
     
@@ -825,7 +828,7 @@ export default function App() {
       if (lastOpen !== todayStr) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().substring(0, 10);
+        const yesterdayStr = localDateKey(yesterday);
         if (lastOpen === yesterdayStr) {
           streak += 1;
         } else {
@@ -845,7 +848,7 @@ export default function App() {
   const toggleDailyPrayer = (key: string) => {
     const updated = { ...dailyPrayers, [key]: !dailyPrayers[key] };
     setDailyPrayers(updated);
-    const todayStr = new Date().toISOString().substring(0, 10);
+    const todayStr = localDateKey();
     safeStorage.setItem('noor_daily_prayers_checked', JSON.stringify({ date: todayStr, prayers: updated }));
   };
 
@@ -1127,6 +1130,16 @@ export default function App() {
       colorClass: 'from-indigo-700 to-sky-600',
       bgLight: 'bg-indigo-500/10 text-indigo-800 border-indigo-500/20',
       component: <IslamicCalendarSection isEn={isEn} />
+    },
+    {
+      id: 'zakat-calculator',
+      title: isEn ? 'Zakat Calculator' : 'حاسبة الزكاة',
+      desc: isEn ? 'Estimate zakat on eligible net wealth with gold or silver nisab' : 'حساب تقديري للزكاة والنصاب بالذهب أو الفضة مع تنبيه شرعي واضح',
+      icon: <Calculator className="w-6 h-6" />,
+      avatarUrl: ISLAMIC_AVATARS.charity,
+      colorClass: 'from-amber-600 to-emerald-700',
+      bgLight: 'bg-amber-500/10 text-amber-900 border-amber-500/20',
+      component: <ZakatCalculatorSection isEn={isEn} />
     },
     {
       id: 'khatma',
