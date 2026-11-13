@@ -10,8 +10,10 @@
 	<string>Noor Al Islam</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>يستخدم نور الإسلام موقعك لتحديد المدينة ومواقيت الصلاة والقبلة.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>يستخدم نور الإسلام موقعك لتحديث مواقيت الصلاة عند الانتقال إلى مدينة أخرى.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>يستخدم نور الإسلام موقعك لتحديث مواقيت الصلاة عند الانتقال إلى مدينة أخرى.</string>
+		<key>NSMotionUsageDescription</key>
+		<string>يستخدم نور الإسلام مستشعر الحركة لتحديد اتجاه القبلة عند تشغيل البوصلة.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
