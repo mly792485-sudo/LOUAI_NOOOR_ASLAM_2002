@@ -1,0 +1,156 @@
+name: Build Noor Al-Islam Flutter Mobile
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/build-flutter.yml'
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: '3.35.2'
+
+jobs:
+  android:
+    name: Flutter Android APK and AAB
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get packages
+        run: flutter pub get
+
+      - name: Analyze Flutter project
+        run: flutter analyze
+
+      - name: Run Flutter tests
+        run: flutter test
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Build release AAB
+        run: flutter build appbundle --release
+
+      - name: Upload Flutter APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: noor-al-islam-flutter-release-apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload Flutter AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: noor-al-islam-flutter-release-aab
+          path: flutter_app/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+  ios:
+    name: Flutter iOS unsigned IPA
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get packages
+        run: flutter pub get
+
+      - name: Analyze Flutter project
+        run: flutter analyze
+
+      - name: Run Flutter tests
+        run: flutter test
+
+      - name: Build unsigned IPA
+        run: flutter build ipa --release --no-codesign
+
+      - name: Package unsigned iOS archive
+        run: |
+          cd build/ios/archive
+          zip -r "${GITHUB_WORKSPACE}/noor-al-islam-flutter-ios-unsigned.xcarchive.zip" ./*.xcarchive
+
+      - name: Upload Flutter iOS archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: noor-al-islam-flutter-ios-unsigned
+          path: |
+            flutter_app/build/ios/ipa/*.ipa
+            noor-al-islam-flutter-ios-unsigned.xcarchive.zip
+          if-no-files-found: warn
+
+  publish:
+    name: Publish Flutter build downloads
+    needs: [android, ios]
+    if: ${{ success() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release folder note
+        run: |
+          cat > RELEASE-NOTES-FLUTTER.md <<'EOF'
+          # Noor Al-Islam Flutter build
+
+          This release contains the Flutter Android APK/AAB and unsigned iOS build artifacts.
+          The iOS package is not App Store signed. Apple signing and provisioning are required before installing it on a device or uploading it to App Store Connect.
+          EOF
+
+      - name: Download Android APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: noor-al-islam-flutter-release-apk
+          path: release
+
+      - name: Download Android AAB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: noor-al-islam-flutter-release-aab
+          path: release
+
+      - name: Download iOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: noor-al-islam-flutter-ios-unsigned
+          path: release
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="noor-flutter-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" release/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Noor Al-Islam Flutter build ${GITHUB_RUN_NUMBER}" \
+            --notes-file RELEASE-NOTES-FLUTTER.md
+          echo "### Flutter release download" >> "$GITHUB_STEP_SUMMARY"
+          echo "[Open the direct GitHub Release page](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${tag})" >> "$GITHUB_STEP_SUMMARY"
