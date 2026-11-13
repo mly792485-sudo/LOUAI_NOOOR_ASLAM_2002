@@ -130,10 +130,10 @@ const CATEGORY_AUDIO_MAP: Record<string, Record<string, string>> = {
   }
 };
 
-// Return ordered candidates. Quranic excerpts use exact ayah audio; other
-// adhkar fall back to the complete category recording instead of playing an
-// unrelated verse or a silent broken URL.
-function getItemAudioCandidates(item: ZekrItem, reciter: AzkarReciter, categoryId: string): string[] {
+// Return only recordings that can be matched to the text. A complete category
+// recording must not be used for an individual item because the spoken audio
+// may not match the text currently shown on screen.
+function getItemAudioCandidates(item: ZekrItem, reciter: AzkarReciter): string[] {
   const candidates: string[] = [];
   // Ayat Al-Kursi (Baqarah 255)
   if (item.text.includes('اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ') || item.text.includes('آية الكرسي')) {
@@ -160,11 +160,9 @@ function getItemAudioCandidates(item: ZekrItem, reciter: AzkarReciter, categoryI
     candidates.push(`https://everyayah.com/data/${reciter.quranPrefix}/001001.mp3`);
   }
 
-  const categoryUrls = CATEGORY_AUDIO_MAP[categoryId] || CATEGORY_AUDIO_MAP.morning;
-  const preferred = categoryUrls[reciter.id];
-  const localFallback = categoryUrls.alafasy;
-  if (preferred) candidates.push(preferred);
-  if (localFallback && localFallback !== preferred) candidates.push(localFallback);
+  // Category recordings are intentionally excluded here. They remain
+  // available through the category-player button, where the whole recording
+  // is presented as a whole and is not mislabeled as one specific item.
   return candidates;
 }
 
@@ -329,7 +327,7 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
       audioRef.current = null;
     }
 
-    const audioUrls = getItemAudioCandidates(item, currentReciter, selectedCatId);
+    const audioUrls = getItemAudioCandidates(item, currentReciter);
     setIsLoadingAudio(true);
     setActivePlayingId(item.id);
     setAudioError(null);

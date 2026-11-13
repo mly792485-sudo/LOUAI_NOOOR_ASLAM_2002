@@ -63,7 +63,7 @@ export default function QiblaSection({ latitude: propLat, longitude: propLng, is
   // Live GPS Coordinates
   const [currentCoords, setCurrentCoords] = useState<{ lat: number; lng: number } | null>(() => {
     if (propLat && propLng) return { lat: propLat, lng: propLng };
-    return { lat: 24.7136, lng: 46.6753 }; // Default Riyadh
+    return null;
   });
 
   const [gpsStatus, setGpsStatus] = useState<'locating' | 'ready' | 'error'>('ready');
@@ -83,20 +83,20 @@ export default function QiblaSection({ latitude: propLat, longitude: propLng, is
   const lastHeadingRef = useRef<number>(0);
 
   // Calculate live Qibla bearing based on current coordinates
-  const qiblaAngle = currentCoords 
+  const qiblaAngle = currentCoords
     ? Math.round(calculateQiblaBearing(currentCoords.lat, currentCoords.lng))
-    : 255;
+    : null;
 
   const distanceKm = currentCoords
     ? calculateDistanceToKaaba(currentCoords.lat, currentCoords.lng)
-    : 800;
+    : null;
 
   // Active angle relative to user's heading
   const currentHeading = deviceHeading !== null ? deviceHeading : manualRotateAngle;
-  const relativeQiblaAngle = (qiblaAngle - currentHeading + 360) % 360;
+  const relativeQiblaAngle = qiblaAngle === null ? null : (qiblaAngle - currentHeading + 360) % 360;
 
   // Is phone aligned within 3 degrees of Kaaba
-  const angleDiff = Math.abs((relativeQiblaAngle + 180) % 360 - 180);
+  const angleDiff = relativeQiblaAngle === null ? Number.POSITIVE_INFINITY : Math.abs((relativeQiblaAngle + 180) % 360 - 180);
   const isAligned = angleDiff <= 3;
   const hasVibratedRef = useRef<boolean>(false);
 
@@ -401,7 +401,7 @@ export default function QiblaSection({ latitude: propLat, longitude: propLng, is
               {/* Kaaba Direction Indicator Arrow (Pointing to Kaaba) */}
               <div 
                 className="absolute inset-0 w-full h-full flex flex-col items-center justify-center transition-transform duration-150 ease-out"
-                style={{ transform: `rotate(${relativeQiblaAngle}deg)` }}
+                style={{ transform: `rotate(${relativeQiblaAngle ?? 0}deg)` }}
               >
                 {/* Kaaba Icon at the tip */}
                 <div className="absolute top-3.5 flex flex-col items-center z-30">
@@ -430,7 +430,7 @@ export default function QiblaSection({ latitude: propLat, longitude: propLng, is
                 isAligned ? 'border-emerald-400 ring-4 ring-emerald-500/30' : 'border-emerald-500/30'
               }`}>
                 <span className="text-base font-black text-amber-300 font-mono tracking-tight">
-                  {qiblaAngle}°
+                  {qiblaAngle === null ? '—' : `${qiblaAngle}°`}
                 </span>
                 <span className="text-[9px] text-emerald-300 font-bold">
                   {isEn ? 'Qibla' : 'القبلة'}
@@ -453,7 +453,11 @@ export default function QiblaSection({ latitude: propLat, longitude: propLng, is
             ) : (
               <>
                 <Navigation className="w-4 h-4 text-amber-400 animate-pulse" />
-                <span>{isEn ? `Rotate phone ${Math.round(relativeQiblaAngle)}° to face Qibla` : `أدِر هاتفك بمقدار ${Math.round(relativeQiblaAngle)}° باتجاه الرمز 🕋`}</span>
+                <span>
+                  {relativeQiblaAngle === null
+                    ? (isEn ? 'Allow location access to calculate Qibla.' : 'اسمح بالوصول إلى موقعك لحساب اتجاه القبلة.')
+                    : (isEn ? `Rotate phone ${Math.round(relativeQiblaAngle)}° to face Qibla` : `أدِر هاتفك بمقدار ${Math.round(relativeQiblaAngle)}° باتجاه الرمز 🕋`)}
+                </span>
               </>
             )}
           </div>
@@ -498,11 +502,11 @@ export default function QiblaSection({ latitude: propLat, longitude: propLng, is
             <div className="space-y-1.5 text-xs text-slate-300">
               <div className="flex items-center justify-between py-1 border-b border-emerald-500/10">
                 <span className="text-slate-400">{isEn ? 'Exact Qibla Azimuth:' : 'زاوية القبلة من الشمال الحقيقي:'}</span>
-                <span className="font-mono font-bold text-amber-400">{qiblaAngle}°</span>
+                <span className="font-mono font-bold text-amber-400">{qiblaAngle === null ? '—' : `${qiblaAngle}°`}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-emerald-500/10">
                 <span className="text-slate-400">{isEn ? 'Distance to Makkah:' : 'المسافة المباشرة إلى مكة:'}</span>
-                <span className="font-mono font-bold text-emerald-300">{distanceKm.toLocaleString()} {isEn ? 'km' : 'كم'}</span>
+                <span className="font-mono font-bold text-emerald-300">{distanceKm === null ? '—' : `${distanceKm.toLocaleString()} ${isEn ? 'km' : 'كم'}`}</span>
               </div>
               <div className="flex items-center justify-between py-1">
                 <span className="text-slate-400">{isEn ? 'Compass Mode:' : 'حالة بوصلة المستشعر:'}</span>
