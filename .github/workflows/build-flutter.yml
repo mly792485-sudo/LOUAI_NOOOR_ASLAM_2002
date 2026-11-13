@@ -100,6 +100,11 @@ jobs:
         run: |
           cd build/ios/archive
           zip -r "${GITHUB_WORKSPACE}/noor-al-islam-flutter-ios-unsigned.xcarchive.zip" ./*.xcarchive
+          app_path=$(find . -path '*/Products/Applications/*.app' -type d | head -1)
+          test -n "$app_path"
+          mkdir -p "${RUNNER_TEMP}/noor-ios-ipa/Payload"
+          cp -R "$app_path" "${RUNNER_TEMP}/noor-ios-ipa/Payload/NoorAlIslam.app"
+          ditto -c -k --sequesterRsrc --keepParent "${RUNNER_TEMP}/noor-ios-ipa" "${GITHUB_WORKSPACE}/noor-al-islam-flutter-ios-unsigned.ipa"
 
       - name: Upload Flutter iOS archive
         uses: actions/upload-artifact@v4
@@ -107,6 +112,7 @@ jobs:
           name: noor-al-islam-flutter-ios-unsigned
           path: |
             flutter_app/build/ios/ipa/*.ipa
+            noor-al-islam-flutter-ios-unsigned.ipa
             noor-al-islam-flutter-ios-unsigned.xcarchive.zip
           if-no-files-found: warn
 
@@ -121,7 +127,7 @@ jobs:
           cat > RELEASE-NOTES-FLUTTER.md <<'EOF'
           # Noor Al-Islam Flutter build
 
-          This release contains the Flutter Android APK/AAB and unsigned iOS build artifacts.
+          This release contains the Flutter Android APK/AAB and an unsigned iOS IPA package plus the Xcode archive.
           The iOS package is not App Store signed. Apple signing and provisioning are required before installing it on a device or uploading it to App Store Connect.
           EOF
 
