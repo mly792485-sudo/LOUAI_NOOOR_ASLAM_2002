@@ -69,7 +69,7 @@ jobs:
 
   ios:
     name: Flutter iOS unsigned IPA
-    runs-on: macos-14
+    runs-on: macos-15
     defaults:
       run:
         working-directory: flutter_app
