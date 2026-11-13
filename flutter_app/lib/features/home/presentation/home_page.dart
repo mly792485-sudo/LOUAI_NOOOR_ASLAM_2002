@@ -11,6 +11,7 @@ import '../../quran/presentation/mushaf_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -53,7 +54,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadPrayerTimes() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final position = await _location.currentPosition();
       final location = PrayerLocation(
@@ -65,15 +69,24 @@ class _HomePageState extends State<HomePage> {
       );
       final result = await _repository.fetchForLocation(location: location);
       if (!mounted) return;
-      setState(() { _result = result; _loading = false; });
+      setState(() {
+        _result = result;
+        _loading = false;
+      });
     } catch (error) {
       if (!mounted) return;
-      setState(() { _error = error; _loading = false; });
+      setState(() {
+        _error = error;
+        _loading = false;
+      });
     }
   }
 
   PrayerTime? get _nextPrayer {
-    final prayers = _result?.prayers.where((p) => p.name != 'Sunrise').toList() ?? const <PrayerTime>[];
+    final prayers = _result?.prayers
+            .where((prayer) => prayer.name != 'Sunrise')
+            .toList() ??
+        const <PrayerTime>[];
     for (final prayer in prayers) {
       if (prayer.asDateTime().isAfter(_now)) return prayer;
     }
@@ -88,30 +101,230 @@ class _HomePageState extends State<HomePage> {
     return target.difference(_now);
   }
 
-  String _countdown(Duration duration) => '${duration.inHours.toString().padLeft(2, '0')}:${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
+  String _countdown(Duration duration) {
+    final hours = duration.inHours.toString().padLeft(2, '0');
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$hours:$minutes:$seconds';
+  }
 
   Future<void> _toggleAdhan() async {
-    if (_playing) { await _audio.stop(); if (mounted) setState(() => _playing = false); return; }
-    try { await _audio.playAsset('assets/audio/adhan.mp3'); if (mounted) setState(() => _playing = true); } catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تعذر تشغيل صوت الأذان'))); }
+    if (_playing) {
+      await _audio.stop();
+      if (mounted) setState(() => _playing = false);
+      return;
+    }
+    try {
+      await _audio.playAsset('assets/audio/adhan.mp3');
+      if (mounted) setState(() => _playing = true);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذر تشغيل صوت الأذان')),
+        );
+      }
+    }
+  }
+
+  Widget _prayerCard(PrayerTime prayer) {
+    return Card(
+      elevation: 0,
+      child: ListTile(
+        title: Text(
+          prayer.arabicName,
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        trailing: Text(
+          prayer.time,
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _scheduleCard() {
+    final next = _nextPrayer;
+    if (_loading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+    if (_error != null) {
+      return Column(
+        children: [
+          const Text(
+            'تعذر تحديث المواقيت',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'تحقق من الإنترنت أو اسمح بالموقع، ثم حاول مرة أخرى.',
+            style: TextStyle(color: Colors.white70),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _loadPrayerTimes,
+            icon: const Icon(Icons.refresh),
+            label: const Text('إعادة المحاولة'),
+          ),
+        ],
+      );
+    }
+    final result = _result!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'الصلاة القادمة',
+          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          next == null ? 'لا توجد بيانات بعد' : 'صلاة ${next.arabicName}',
+          style: const TextStyle(
+            color: Color(0xFFFFD166),
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _countdown(_remaining),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 34,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 3,
+          ),
+        ),
+        if (next != null)
+          Text(
+            'وقت الأذان ${next.time}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70),
+          ),
+        const SizedBox(height: 8),
+        Text(
+          result.cached
+              ? 'بيانات محفوظة من آخر تحديث — دون اتصال'
+              : 'المصدر: ${result.source} | ${result.timezone}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white60, fontSize: 11),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: _toggleAdhan,
+          icon: Icon(_playing ? Icons.stop : Icons.volume_up),
+          label: Text(_playing ? 'إيقاف الأذان' : 'تجربة صوت الأذان'),
+        ),
+      ],
+    );
+  }
+
+  void _openSection(String title) {
+    if (title == 'القرآن الكريم') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const MushafPage()),
+      );
+    } else if (title == 'مستشار نور الإسلام') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const AssistantPage()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final next = _nextPrayer;
-    return Directionality(textDirection: TextDirection.rtl, child: Scaffold(
-      appBar: AppBar(title: const Text('نور الإسلام', style: TextStyle(fontWeight: FontWeight.w800)), actions: [IconButton(onPressed: _loadPrayerTimes, icon: const Icon(Icons.refresh_rounded), tooltip: 'تحديث المواقيت')]),
-      body: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 28), children: [
-        Card(elevation: 0, color: colors.primaryContainer, child: const Padding(padding: EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('أهلاً بك في نور الإسلام', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w900)), SizedBox(height: 8), Text('مواقيت الصلاة تتحدث حسب موقعك وتاريخ اليوم، وليست أوقاتًا ثابتة.')]))),
-        const SizedBox(height: 14),
-        Card(elevation: 0, color: const Color(0xFF0B2420), child: Padding(padding: const EdgeInsets.all(18), child: _loading ? const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: Colors.white))) : _error != null ? Column(children: [const Text('تعذر تحديث المواقيت', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), const SizedBox(height: 8), Text('تحقق من الإنترنت أو اسمح بالموقع، ثم حاول مرة أخرى.', style: const TextStyle(color: Colors.white70), textAlign: TextAlign.center), const SizedBox(height: 12), FilledButton.icon(onPressed: _loadPrayerTimes, icon: const Icon(Icons.refresh), label: const Text('إعادة المحاولة'))]) : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [const Text('الصلاة القادمة', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)), const SizedBox(height: 8), Text(next == null ? 'لا توجد بيانات بعد' : 'صلاة ${next.arabicName}', style: const TextStyle(color: Color(0xFFFFD166), fontSize: 24, fontWeight: FontWeight.w900)), const SizedBox(height: 8), Text(_countdown(_remaining), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w900, letterSpacing: 3)), if (next != null) Text('وقت الأذان ${next.time}', textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)), const SizedBox(height: 8), Text(_result!.cached ? 'بيانات محفوظة من آخر تحديث — دون اتصال' : 'مصدر البيانات: ${_result!.source} | ${_result!.timezone}', textAlign: TextAlign.center, style: const TextStyle(color: Colors.white60, fontSize: 11)), const SizedBox(height: 12), FilledButton.icon(onPressed: _toggleAdhan, icon: Icon(_playing ? Icons.stop : Icons.volume_up), label: Text(_playing ? 'إيقاف الأذان' : 'تجربة صوت الأذان'))])),
-        const SizedBox(height: 20),
-        const Text('أوقات اليوم', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 8),
-        if (_result != null) ..._result!.prayers.map((p) => Card(elevation: 0, child: ListTile(title: Text(p.arabicName, style: const TextStyle(fontWeight: FontWeight.w800)), trailing: Text(p.time, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)))),
-        const SizedBox(height: 12), const Text('أقسام التطبيق', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)), const SizedBox(height: 8),
-        ...sections.map((section) => Card(elevation: 0, margin: const EdgeInsets.only(bottom: 10), child: ListTile(leading: CircleAvatar(backgroundColor: colors.primaryContainer, child: Icon(section.icon, color: colors.primary)), title: Text(section.title, style: const TextStyle(fontWeight: FontWeight.w800)), subtitle: Text(section.subtitle), trailing: const Icon(Icons.chevron_left_rounded), onTap: () { if (section.title == 'القرآن الكريم') Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MushafPage())); else if (section.title == 'مستشار نور الإسلام') Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AssistantPage())); }))),
-      ],),
-    ));
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'نور الإسلام',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          actions: [
+            IconButton(
+              onPressed: _loadPrayerTimes,
+              icon: const Icon(Icons.refresh_rounded),
+              tooltip: 'تحديث المواقيت',
+            ),
+          ],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+          children: [
+            Card(
+              elevation: 0,
+              color: colors.primaryContainer,
+              child: const Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'أهلاً بك في نور الإسلام',
+                      style: TextStyle(fontSize: 23, fontWeight: FontWeight.w900),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'مواقيت الصلاة تتحدث حسب موقعك وتاريخ اليوم، وليست أوقاتًا ثابتة.',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Card(
+              elevation: 0,
+              color: const Color(0xFF0B2420),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: _scheduleCard(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'أوقات اليوم',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            if (_result != null)
+              ..._result!.prayers.map(_prayerCard),
+            const SizedBox(height: 12),
+            const Text(
+              'أقسام التطبيق',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            ...sections.map(
+              (section) => Card(
+                elevation: 0,
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: colors.primaryContainer,
+                    child: Icon(section.icon, color: colors.primary),
+                  ),
+                  title: Text(
+                    section.title,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  subtitle: Text(section.subtitle),
+                  trailing: const Icon(Icons.chevron_left_rounded),
+                  onTap: () => _openSection(section.title),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

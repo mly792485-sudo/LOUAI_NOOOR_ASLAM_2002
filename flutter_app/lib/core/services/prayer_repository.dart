@@ -94,7 +94,7 @@ class PrayerRepository {
     return PrayerTimesResult(prayers: prayers, date: date, latitude: (json['latitude'] as num?)?.toDouble() ?? location.latitude, longitude: (json['longitude'] as num?)?.toDouble() ?? location.longitude, timezone: json['timezone']?.toString() ?? location.timezone ?? 'UTC', method: method, school: school, source: '${json['source'] ?? 'cached'} / offline cache', cached: true);
   }
 
-  String _cacheKey(PrayerLocation location, DateTime date, int method, int school) => 'prayer_times_v2_${location.latitude.toStringAsFixed(3)}_${location.longitude.toStringAsFixed(3)}_${prayerDateKey(date)}_$method\_$school';
+  String _cacheKey(PrayerLocation location, DateTime date, int method, int school) => 'prayer_times_v2_${location.latitude.toStringAsFixed(3)}_${location.longitude.toStringAsFixed(3)}_${prayerDateKey(date)}_${method}_$school';
   bool _isBahrain(PrayerLocation location) => location.countryCode?.toUpperCase() == 'BH' || (location.latitude > 25 && location.latitude < 27.5 && location.longitude > 49.5 && location.longitude < 51.5);
   int _methodForCountry(String? code, {String? country}) { final value = (code ?? country ?? '').toLowerCase(); if (value.contains('sa') || value.contains('السعود')) return 4; if (value.contains('eg') || value.contains('مصر')) return 5; if (value.contains('bh') || value.contains('بحرين')) return 7; if (value.contains('kw') || value.contains('كويت')) return 9; if (value.contains('qa') || value.contains('قطر')) return 10; return 3; }
   DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
