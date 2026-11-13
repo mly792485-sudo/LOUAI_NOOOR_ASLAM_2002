@@ -74,39 +74,14 @@ async function openAIChat(messages: Array<{ role: string; content: string }>, st
   return response;
 }
 
-// 1. API route for dynamic Tafsir
+// 1. Tafsir route: never generate Quranic tafsir with an LLM.
+// A verified tafsir dataset must be imported and reviewed before this route is enabled.
 app.post("/api/ai/tafsir", async (req, res) => {
-  try {
-    const { surahNumber, surahName, ayahNumber } = req.body;
-    if (!surahNumber) {
-      return res.status(400).json({ error: "surahNumber is required" });
-    }
-
-    let prompt = "";
-    if (ayahNumber) {
-      prompt = `أنت عالم مفسر للقرآن الكريم. يرجى تقديم تفسير ميسر ودقيق وموثوق (مستنداً إلى تفسير ابن كثير والسعدي والطبري) للآية رقم ${ayahNumber} من سورة ${surahName || surahNumber}. 
-أظهر أولاً نص الآية الكريمة بخط قرآني واضح، ثم اذكر سبب النزول إن وجد، ثم التفسير المفصل، والفوائد والعبر المستخلصة من الآية. 
-اكتب بلغة عربية فصيحة بليغة واستخدم تنسيق Markdown بشكل جميل ومنظم جداً مع فقرات واضحة وعناوين بارزة.`;
-    } else {
-      prompt = `أنت عالم مفسر للقرآن الكريم. يرجى تقديم تفسير شامل وتعريف متكامل لسورة ${surahName || surahNumber} (السورة رقم ${surahNumber}).
-وضح الآتي:
-1. مقاصد السورة ومواضيعها الرئيسية.
-2. أسباب نزول السورة أو آيات مشهورة منها إن وجد.
-3. فضل السورة الكريمة من الأحاديث الصحيحة.
-4. خلاصة عامة أو تفسير إجمالي لآياتها.
-اكتب بلغة عربية فصيحة بليغة واستخدم تنسيق Markdown بطريقة احترافية وجميلة ومريحة جداً للقراءة وبأسلوب منظم يسهل على المؤمن فهم كلام ربه.`;
-    }
-
-    const response = await openAIChat([
-      { role: "system", content: "أنت مفسر ناقل أمين. لا تخترع نص الآية أو سبب النزول. اذكر مصدر كل نقل، وصرّح بعدم التحقق عند الشك." },
-      { role: "user", content: prompt },
-    ]);
-    const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-    res.json({ text: data.choices?.[0]?.message?.content || "تعذر الحصول على تفسير من الخادم." });
-  } catch (error: any) {
-    console.error("Tafsir API Error:", error);
-    res.status(500).json({ error: error.message || "حدث خطأ أثناء معالجة طلب التفسير" });
-  }
+  return res.status(503).json({
+    available: false,
+    error: "التفسير المولد بالذكاء الاصطناعي متوقف حفاظًا على أمان المحتوى الشرعي.",
+    message: "سيُفعّل التفسير بعد إضافة قاعدة بيانات تفسير موثقة ومراجعة مصدر كل نقل.",
+  });
 });
 
 // 2. API route for Islamic Q&A Companion (Streaming for real-time speed)
