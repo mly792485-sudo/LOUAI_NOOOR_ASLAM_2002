@@ -67,6 +67,7 @@ import UnifiedSearchFavoritesModal from './components/UnifiedSearchFavoritesModa
 import DailyWorshipSection from './components/DailyWorshipSection';
 import IslamicCalendarSection from './components/IslamicCalendarSection';
 import ZakatCalculatorSection from './components/ZakatCalculatorSection';
+import OriginalOnboardingWizard from './components/OriginalOnboardingWizard';
 import { ISLAMIC_AVATARS } from './assets/avatars';
 import { requestAllPermissions, scheduleAllNativeNotifications, checkPermissionsStatus, NativePrayerScheduleDay } from './utils/nativeNotifications';
 import { playAdhanAudio, stopAdhanAudio, playPrePrayerChime } from './utils/adhanPlayer';
@@ -119,7 +120,11 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isSearchFavModalOpen, setIsSearchFavModalOpen] = useState<boolean>(false);
   const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(() => {
-    return safeStorage.getItem('noor_hide_welcome_splash') !== 'true';
+    return safeStorage.getItem('noor_hide_welcome_splash') !== 'true'
+      && safeStorage.getItem('noor_original_onboarding_complete') === 'true';
+  });
+  const [showOriginalOnboarding, setShowOriginalOnboarding] = useState<boolean>(() => {
+    return safeStorage.getItem('noor_original_onboarding_complete') !== 'true';
   });
   const [activeAdhanAlert, setActiveAdhanAlert] = useState<{
     prayerName: string;
@@ -1670,6 +1675,20 @@ export default function App() {
               if (secId) {
                 handleNavigateToSection(secId);
               }
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* First-run setup from the reference flow, integrated into the original React app. */}
+      <AnimatePresence>
+        {showOriginalOnboarding && !showWelcomeSplash && (
+          <OriginalOnboardingWizard
+            settings={settings}
+            onComplete={(patch) => {
+              setSettings(previous => ({ ...previous, ...patch }));
+              setShowOriginalOnboarding(false);
+              safeStorage.setItem('noor_original_onboarding_complete', 'true');
             }}
           />
         )}
