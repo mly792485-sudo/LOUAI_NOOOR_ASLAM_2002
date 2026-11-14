@@ -103,26 +103,62 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
                 child: Row(
                   children: [
-                    if (_step > 0) IconButton(onPressed: _back, icon: const Icon(Icons.arrow_back_rounded)) else const SizedBox(width: 48),
-                    Expanded(child: Text('نور الإسلام', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))),
+                    if (_step > 0)
+                      IconButton(onPressed: _back, icon: const Icon(Icons.arrow_back_rounded))
+                    else
+                      const SizedBox(width: 48),
+                    Expanded(
+                      child: Text(
+                        'نور الإسلام',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                     const SizedBox(width: 48),
                   ],
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                child: Row(children: List.generate(4, (index) => Expanded(child: Container(margin: const EdgeInsets.symmetric(horizontal: 3), height: 5, decoration: BoxDecoration(color: index <= _step ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(99))))))),
+                child: Row(
+                  children: List.generate(
+                    4,
+                    (index) => Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: index <= _step
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
               Expanded(
                 child: PageView(
                   controller: _pageController,
                   physics: const NeverScrollableScrollPhysics(),
-                  children: [_languageStep(), _locationStep(), _genderStep(), _accountStep()],
+                  children: <Widget>[
+                    _languageStep(),
+                    _locationStep(),
+                    _genderStep(),
+                    _accountStep(),
+                  ],
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                child: SizedBox(width: double.infinity, child: FilledButton(onPressed: _next, child: Text(_step == 3 ? 'الدخول إلى التطبيق' : 'متابعة'))),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _next,
+                    child: Text(_step == 3 ? 'الدخول إلى التطبيق' : 'متابعة'),
+                  ),
+                ),
               ),
             ],
           ),
