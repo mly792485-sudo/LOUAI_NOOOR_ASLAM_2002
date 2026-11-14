@@ -88,8 +88,8 @@ export default function OriginalOnboardingWizard({ settings, onComplete }: Props
   const subtitle = ['يمكنك تغيير اللغة لاحقًا من الإعدادات.', 'يساعدنا موقعك على حساب مواقيت الصلاة وتحديد اتجاه القبلة بدقة.', 'هذا الاختيار اختياري ولا يمنع استخدام الوظائف الأساسية.', 'استخدم التطبيق كزائر، أو اربط خدمة مصادقة حقيقية لاحقًا للمزامنة.'][step];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-[#061011]/95 p-4 text-slate-100 backdrop-blur-md" dir={dir}>
-      <div className="my-auto w-full max-w-2xl rounded-[2rem] border border-emerald-400/20 bg-[#0B1719] p-5 shadow-2xl shadow-black/60 sm:p-8">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-[#061011] px-4 pb-8 pt-[calc(env(safe-area-inset-top)+2.75rem)] text-slate-100" dir={dir}>
+      <div className="my-2 w-full max-w-2xl rounded-[2rem] border border-emerald-400/20 bg-[#0B1719] p-5 shadow-2xl shadow-black/60 sm:my-4 sm:p-8">
         <div className="mb-6 flex items-center justify-between gap-3">
           <button type="button" onClick={() => step > 0 && setStep(step - 1)} className={`rounded-xl border border-white/10 p-2 text-slate-300 transition hover:bg-white/10 ${step === 0 ? 'invisible' : ''}`} aria-label="رجوع"><ChevronLeft className="h-5 w-5" /></button>
           <div className="text-center"><div className="font-kufi text-lg font-black text-emerald-300">نور الإسلام</div><div className="mt-1 text-xs text-slate-400">الإعداد الأول · {step + 1} من 4</div></div>

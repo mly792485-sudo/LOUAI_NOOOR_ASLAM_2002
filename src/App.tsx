@@ -1232,8 +1232,8 @@ export default function App() {
       className="min-h-[100dvh] bg-[#FCFAF6] dark:bg-[#070D0E] text-slate-800 dark:text-[#E2EAEB] transition-colors duration-500 font-sans islamic-pattern"
       dir={isEn ? "ltr" : "rtl"}
     >
-      {/* Main Premium App Bar with iOS Native Safe-Area & Dynamic Island handling (Only shown inside the app, never on the welcome splash screen) */}
-      {!showWelcomeSplash && (
+      {/* Main Premium App Bar with iOS Native Safe-Area & Dynamic Island handling (hidden during first-run setup) */}
+      {!showWelcomeSplash && !showOriginalOnboarding && (
         <header className="top-bar app-top-bar px-1.5 sm:px-6 py-1 sm:py-1.5 gap-1.5 flex items-center justify-between border-b border-[#EBE7DF] dark:border-[#142225]">
         
         {/* Left Side (LTR): Action Controls - [Globe] [Theme] [Profile] [Share] [Settings] */}
@@ -1335,7 +1335,7 @@ export default function App() {
       )}
 
       {/* Main Layout Grid with safe offset for fixed Header */}
-      {!showWelcomeSplash && (
+      {!showWelcomeSplash && !showOriginalOnboarding && (
       <main className="app-main max-w-7xl mx-auto w-full px-1.5 sm:px-5 lg:px-8 py-2 sm:py-2.5">
         <AnimatePresence mode="wait">
           {activeSection === null ? (
@@ -1633,7 +1633,7 @@ export default function App() {
       )}
 
       {/* Persistent Islamic footer dedication */}
-      {!showWelcomeSplash && (
+      {!showWelcomeSplash && !showOriginalOnboarding && (
         <footer className="w-full bg-white dark:bg-[#050A0B] border-t border-[#EBE7DF] dark:border-[#132326] py-6 px-4 sm:px-8 text-center text-xs text-slate-500 dark:text-slate-400 space-y-3.5 font-sans mt-6">
           <div className="max-w-2xl mx-auto space-y-2 leading-relaxed font-semibold">
             <p className="text-sm sm:text-[15px] text-emerald-900 dark:text-emerald-300 font-extrabold font-amiri">

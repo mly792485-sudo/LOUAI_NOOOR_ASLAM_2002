@@ -256,6 +256,25 @@ export const METHOD_IDS: { [key: string]: number } = {
   Diyanet: 13,
 };
 
+// The Bahrain profile is only for Bahrain. For a user travelling elsewhere,
+// choose a sensible regional default unless the user explicitly selected a
+// calculation method in Settings.
+const COUNTRY_DEFAULT_METHODS: Record<string, number> = {
+  BH: 4,
+  SA: 4,
+  AE: 8,
+  QA: 8,
+  KW: 8,
+  OM: 8,
+  EG: 5,
+  TR: 13,
+  ID: 11,
+  MY: 11,
+  PK: 1,
+  BD: 1,
+  IN: 1,
+};
+
 const BAHRAIN_EAST = { latitude: 26.27, longitude: 50.68 };
 const BAHRAIN_WEST = { latitude: 26.22, longitude: 50.44 };
 const BAHRAIN_TIMEZONE_OFFSET_HOURS = 3;
@@ -356,7 +375,12 @@ function calculateBahrainOfficialTimes(date: Date) {
 
 // Helper to find Country & City
 export function findCountryAndCity(countryName?: string, cityName?: string) {
-  let countryObj = PRAYER_COUNTRIES.find(c => c.ar === countryName || c.en === countryName);
+  const normalizedCountry = countryName?.trim().toLocaleLowerCase();
+  let countryObj = PRAYER_COUNTRIES.find(c => {
+    const ar = c.ar.toLocaleLowerCase();
+    const en = c.en.toLocaleLowerCase();
+    return Boolean(normalizedCountry && (ar === normalizedCountry || en === normalizedCountry || ar.includes(normalizedCountry) || normalizedCountry.includes(ar) || en.includes(normalizedCountry) || normalizedCountry.includes(en)));
+  });
 
   if (!countryObj) {
     // Search city in all countries if country not explicitly set
@@ -386,8 +410,8 @@ const getHijriDate = (date: Date) => {
   }
 };
 
-const prayerCacheKey = (country: string, city: string, date: Date, method: string, methodId: number) =>
-  `noor-prayer-times-v3:${country}:${city}:${formatApiDate(date)}:${method}:${methodId}`;
+const prayerCacheKey = (country: string, city: string, date: Date, method: string, methodId: number, coordinates?: { latitude: number; longitude: number }) =>
+  `noor-prayer-times-v4:${country}:${city}:${formatApiDate(date)}:${method}:${methodId}:${coordinates ? `${coordinates.latitude.toFixed(3)},${coordinates.longitude.toFixed(3)}` : 'city'}`;
 
 const readCachedPrayerTimes = (key: string) => {
   try {
@@ -417,12 +441,20 @@ export async function getAccuratePrayerTimes(
   offsets: Partial<Record<'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha', number>> = {},
 ) {
   const { country, city } = findCountryAndCity(countryName, cityName);
+  const requestedCountry = countryName?.trim().toLocaleLowerCase();
+  const knownCountry = PRAYER_COUNTRIES.some(c => {
+    const ar = c.ar.toLocaleLowerCase();
+    const en = c.en.toLocaleLowerCase();
+    return Boolean(requestedCountry && (ar === requestedCountry || en === requestedCountry || ar.includes(requestedCountry) || requestedCountry.includes(ar) || en.includes(requestedCountry) || requestedCountry.includes(en)));
+  });
+  const effectiveCountryCode = knownCountry ? country.code : 'GLOBAL';
 
-  // BahrainOfficial uses the local reference profile that matches the user's
-  // Riffa comparison: method 4 returns Fajr 04:22 on 24 Oct 2026, instead of
-  // method 8's 04:17. Other countries keep their own selected method.
-  const methodId = method === 'BahrainOfficial' ? METHOD_IDS.UmmAlQura : (METHOD_IDS[method] || 4);
-  const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`, methodId);
+  // BahrainOfficial is a Bahrain-only profile. If the user is elsewhere and
+  // has not selected a custom method, use that country's regional default.
+  const methodId = method === 'BahrainOfficial'
+    ? (COUNTRY_DEFAULT_METHODS[effectiveCountryCode] || METHOD_IDS.MWL)
+    : (METHOD_IDS[method] || METHOD_IDS.MWL);
+  const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`, methodId, coordinates);
   try {
     const datePath = formatApiDate(date);
     const endpoint = coordinates
@@ -441,9 +473,9 @@ export async function getAccuratePrayerTimes(
           throw new Error('Prayer API returned an incomplete schedule');
         }
         const result = {
-          source: country.code === 'BH' ? 'api-bahrain-gulf' : 'api',
+          source: effectiveCountryCode === 'BH' ? 'api-bahrain-gulf' : 'api',
           sourceUrl: endpoint,
-          country: country.ar,
+          country: knownCountry ? country.ar : (countryName || country.ar),
           city: coordinates ? 'موقعك الحالي' : city.ar,
           hijriDate: json.data.date?.hijri ? `${json.data.date.hijri.day} ${json.data.date.hijri.month.ar} ${json.data.date.hijri.year} هـ` : getHijriDate(date),
           additionalTimes: {
