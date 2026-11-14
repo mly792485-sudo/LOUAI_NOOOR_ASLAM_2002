@@ -111,7 +111,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                child: Row(children: List.generate(4, (index) => Expanded(child: Container(margin: const EdgeInsets.symmetric(horizontal: 3), height: 5, decoration: BoxDecoration(color: index <= _step ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(99))))),
+                child: Row(children: List.generate(4, (index) => Expanded(child: Container(margin: const EdgeInsets.symmetric(horizontal: 3), height: 5, decoration: BoxDecoration(color: index <= _step ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(99))))))),
               ),
               Expanded(
                 child: PageView(
@@ -179,7 +179,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Widget _choice(String value, String label, IconData icon) {
     final selected = _gender == value;
-    return InkWell(onTap: () => setState(() => _gender = value), borderRadius: BorderRadius.circular(18), child: Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: selected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest, border: Border.all(color: selected ? Theme.of(context).colorScheme.primary : Colors.transparent, width: 2)), child: Row(children: [Icon(icon), const SizedBox(width: 12), Text(label, style: const TextStyle(fontWeight: FontWeight.bold)), const Spacer(), if (selected) const Icon(Icons.check_circle)]));
+    return InkWell(onTap: () => setState(() => _gender = value), borderRadius: BorderRadius.circular(18), child: Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: selected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest, border: Border.all(color: selected ? Theme.of(context).colorScheme.primary : Colors.transparent, width: 2)), child: Row(children: [Icon(icon), const SizedBox(width: 12), Text(label, style: const TextStyle(fontWeight: FontWeight.bold)), const Spacer(), if (selected) const Icon(Icons.check_circle)])));
   }
 
   Widget _accountStep() => _shell(icon: Icons.verified_user_outlined, title: 'مرحبًا بك في نور الإسلام', subtitle: 'يمكنك استخدام التطبيق كزائر. تسجيل الدخول والمزامنة سيُضافان فقط بعد ربط مزود مصادقة حقيقي.', child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [const SizedBox(height: 22), Card(child: const Padding(padding: EdgeInsets.all(16), child: Text('لن ننشئ حسابًا وهميًا ولن نطلب كلمة مرور دون خدمة مصادقة آمنة. يمكنك المتابعة كزائر وحفظ الإعدادات على جهازك.'))), const SizedBox(height: 12), OutlinedButton.icon(onPressed: () {}, icon: const Icon(Icons.login_rounded), label: const Text('تسجيل الدخول (يتطلب إعداد الخدمة)'))]));
