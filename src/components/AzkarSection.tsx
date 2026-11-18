@@ -324,10 +324,34 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
       audioRef.current = null;
     }
 
-    const audioUrls: string[] = [];
+    const bundledUrl = CATEGORY_AUDIO_MAP[selectedCatId]?.[selectedReciterId];
+    const audioUrls: string[] = bundledUrl ? [bundledUrl] : [];
     setIsLoadingAudio(true);
     setActivePlayingId('category');
     setAudioError(null);
+    // Start a bundled recording synchronously from the user's tap. This is
+    // required by iOS WebView autoplay policy; async catalog validation runs
+    // after the media element has been created and never supplies a recording
+    // from another category.
+    const startAudio = (audioUrl: string) => {
+      const audio = new Audio(audioUrl);
+      audio.preload = 'auto';
+      audioRef.current = audio;
+      audio.onloadedmetadata = () => { setAudioDuration(audio.duration || 0); setIsLoadingAudio(false); };
+      audio.ontimeupdate = () => { setCurrentTime(audio.currentTime); if (audio.duration) setAudioProgress((audio.currentTime / audio.duration) * 100); };
+      audio.onended = () => { setIsPlaying(false); setActivePlayingId(null); setAudioProgress(0); };
+      void audio.play().then(() => { setIsPlaying(true); setIsLoadingAudio(false); }).catch(() => {
+        setIsLoadingAudio(false);
+        setIsPlaying(false);
+        setActivePlayingId(null);
+        setAudioError('تعذر تشغيل الصوت. اضغط على زر التشغيل مرة أخرى للتحقق من إعدادات الصوت في الجهاز.');
+      });
+      return audio;
+    };
+    if (bundledUrl) {
+      startAudio(bundledUrl);
+      return;
+    }
     void (async () => {
       const audioUrl = await adhkarAudioManager.resolveCategoryUrl(selectedCatId, selectedReciterId);
       if (!audioUrl) {
@@ -340,21 +364,13 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
       audioUrls.push(audioUrl);
       for (const audioUrl of audioUrls) {
         try {
-          const audio = new Audio(audioUrl);
-          audio.preload = 'auto';
+          const audio = startAudio(audioUrl);
           await new Promise<void>((resolve, reject) => {
             const timeout = window.setTimeout(() => reject(new Error('audio timeout')), 10000);
             audio.oncanplaythrough = () => { window.clearTimeout(timeout); resolve(); };
             audio.onerror = () => { window.clearTimeout(timeout); reject(new Error('audio unavailable')); };
             audio.load();
           });
-          audioRef.current = audio;
-          audio.onloadedmetadata = () => { setAudioDuration(audio.duration || 0); setIsLoadingAudio(false); };
-          audio.ontimeupdate = () => { setCurrentTime(audio.currentTime); if (audio.duration) setAudioProgress((audio.currentTime / audio.duration) * 100); };
-          audio.onended = () => { setIsPlaying(false); setActivePlayingId(null); setAudioProgress(0); };
-          await audio.play();
-          setIsPlaying(true);
-          setIsLoadingAudio(false);
           return;
         } catch (_) { /* try local bundled recording */ }
       }
