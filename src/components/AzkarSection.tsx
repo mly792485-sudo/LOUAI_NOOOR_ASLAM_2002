@@ -66,68 +66,14 @@ export const SHEIKH_RECITERS: AzkarReciter[] = [
   { id: 'qatami', name: 'الشيخ ناصر القطامي', subName: 'أدعية وتلاوات ترقيق القلوب', quranPrefix: 'Nasser_Alqatami_128kbps' }
 ];
 
-// Audio URL mappings for category streaming
-const CATEGORY_AUDIO_MAP: Record<string, Record<string, string>> = {
-  morning: {
-    alafasy: '/audio/adhkar_morning.mp3',
-    ghamdi: 'https://download.quranicaudio.com/adhkar/saad_al_ghamdi_adhkar.mp3',
-    ajmy: 'https://download.quranicaudio.com/ruqyah/ahmed_bin_ali_al-ajmy_ruqyah.mp3',
-    maher: 'https://everyayah.com/data/MaherAlMuaiqly128kbps/002255.mp3',
-    basit: 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/002255.mp3',
-    dussary: 'https://download.quranicaudio.com/ruqyah/yasser_ad-dussary_ruqyah.mp3',
-    minshawi: 'https://everyayah.com/data/Minshawy_Murattal_128kbps/002255.mp3',
-    qatami: 'https://download.quranicaudio.com/adhkar/mishary_rashid_al_afasy_morning_adhkar.mp3'
-  },
-  evening: {
-    alafasy: '/audio/adhkar_evening.mp3',
-    ghamdi: 'https://download.quranicaudio.com/adhkar/saad_al_ghamdi_adhkar.mp3',
-    ajmy: 'https://download.quranicaudio.com/ruqyah/ahmed_bin_ali_al-ajmy_ruqyah.mp3',
-    maher: 'https://everyayah.com/data/MaherAlMuaiqly128kbps/002255.mp3',
-    basit: 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/002255.mp3',
-    dussary: 'https://download.quranicaudio.com/ruqyah/yasser_ad-dussary_ruqyah.mp3',
-    minshawi: 'https://everyayah.com/data/Minshawy_Murattal_128kbps/002255.mp3',
-    qatami: 'https://download.quranicaudio.com/adhkar/mishary_rashid_al_afasy_evening_adhkar.mp3'
-  },
-  sleep: {
-    alafasy: '/audio/adhkar_sleep.mp3',
-    ghamdi: 'https://download.quranicaudio.com/adhkar/saad_al_ghamdi_adhkar.mp3',
-    ajmy: 'https://download.quranicaudio.com/ruqyah/ahmed_bin_ali_al-ajmy_ruqyah.mp3',
-    maher: 'https://everyayah.com/data/MaherAlMuaiqly128kbps/002255.mp3',
-    basit: 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/002255.mp3',
-    dussary: 'https://download.quranicaudio.com/ruqyah/yasser_ad-dussary_ruqyah.mp3',
-    minshawi: 'https://everyayah.com/data/Minshawy_Murattal_128kbps/002255.mp3',
-    qatami: 'https://download.quranicaudio.com/adhkar/mishary_rashid_al_afasy_sleep_adhkar.mp3'
-  },
-  wakeup: {
-    alafasy: 'https://download.quranicaudio.com/adhkar/mishary_alafasy_wake_adhkar.mp3',
-    ghamdi: 'https://download.quranicaudio.com/adhkar/saad_al_ghamdi_adhkar.mp3',
-    ajmy: 'https://download.quranicaudio.com/ruqyah/ahmed_bin_ali_al-ajmy_ruqyah.mp3',
-    maher: 'https://everyayah.com/data/MaherAlMuaiqly128kbps/001001.mp3',
-    basit: 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/001001.mp3',
-    dussary: 'https://everyayah.com/data/Yasser_Ad-Dussary_128kbps/001001.mp3',
-    minshawi: 'https://everyayah.com/data/Minshawy_Murattal_128kbps/001001.mp3',
-    qatami: 'https://download.quranicaudio.com/adhkar/mishary_alafasy_wake_adhkar.mp3'
-  },
-  tahajjud: {
-    alafasy: '/audio/adhkar_witr.mp3',
-    ghamdi: '/audio/adhkar_witr.mp3',
-    ajmy: '/audio/adhkar_witr.mp3',
-    maher: '/audio/adhkar_witr.mp3',
-    basit: '/audio/adhkar_witr.mp3',
-    dussary: '/audio/adhkar_witr.mp3',
-    minshawi: '/audio/adhkar_witr.mp3',
-    qatami: '/audio/adhkar_witr.mp3'
-  },
-  ruqyah: {
-    alafasy: 'https://download.quranicaudio.com/ruqyah/mishary_rashid_al_afasy_ruqyah.mp3',
-    ghamdi: 'https://download.quranicaudio.com/ruqyah/saad_al-ghamdi_ruqyah.mp3',
-    ajmy: 'https://download.quranicaudio.com/ruqyah/ahmed_bin_ali_al-ajmy_ruqyah.mp3',
-    maher: 'https://server12.mp3quran.net/maher/001.mp3',
-    basit: 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/002255.mp3',
-    dussary: 'https://download.quranicaudio.com/ruqyah/yasser_ad-dussary_ruqyah.mp3',
-    minshawi: 'https://everyayah.com/data/Minshawy_Murattal_128kbps/002255.mp3',
-    qatami: 'https://download.quranicaudio.com/ruqyah/mishary_rashid_al_afasy_ruqyah.mp3'
-  }
+// Category recordings are listed only when we have a recording explicitly
+// matching that category. Never substitute a morning recording for another
+// category or a Quran verse for a complete adhkar collection.
+const CATEGORY_AUDIO_MAP: Partial<Record<string, Partial<Record<string, string>>>> = {
+  morning: { alafasy: '/audio/adhkar_morning.mp3' },
+  evening: { alafasy: '/audio/adhkar_evening.mp3' },
+  sleep: { alafasy: '/audio/adhkar_sleep.mp3' },
+  tahajjud: { alafasy: '/audio/adhkar_witr.mp3' },
 };
 
 // Return only recordings that can be matched to the text. A complete category
@@ -377,8 +323,15 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
       audioRef.current = null;
     }
 
-    const categoryUrls = CATEGORY_AUDIO_MAP[selectedCatId] || CATEGORY_AUDIO_MAP.morning;
-    const audioUrls = [categoryUrls[selectedReciterId], categoryUrls.alafasy].filter(Boolean) as string[];
+    const categoryUrls = CATEGORY_AUDIO_MAP[selectedCatId];
+    const audioUrl = categoryUrls?.[selectedReciterId];
+    if (!audioUrl) {
+      setAudioError('الصوت غير متوفر حاليًا لهذا القسم والقارئ، وسيتم إضافته قريبًا بإذن الله.');
+      setActivePlayingId(null);
+      setIsLoadingAudio(false);
+      return;
+    }
+    const audioUrls = [audioUrl];
     setIsLoadingAudio(true);
     setActivePlayingId('category');
     setAudioError(null);
@@ -406,7 +359,7 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
       setIsLoadingAudio(false);
       setIsPlaying(false);
       setActivePlayingId(null);
-      setAudioError('تعذر تشغيل تسجيل هذا القسم. أعد المحاولة مع اتصال إنترنت جيد.');
+      setAudioError('الصوت غير متوفر حاليًا لهذا القسم، وسيتم إضافته قريبًا بإذن الله.');
     })();
   };
 

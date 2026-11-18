@@ -39,7 +39,7 @@ if (isFirebaseConfigured) {
 /** Nullable until VITE_FIREBASE_* values are supplied at build time. */
 export const auth = authInstance;
 
-export const firebaseSetupMessage = 'خدمة الحسابات غير متاحة حاليًا. يمكنك المتابعة كزائر، أو المحاولة مرة أخرى لاحقًا.';
+export const firebaseSetupMessage = 'لم تُضمَّن إعدادات Firebase في نسخة التطبيق الحالية. أضف إعدادات مشروع Firebase ومكّن تسجيل الدخول بالبريد وكلمة المرور ثم أعد البناء. يمكنك المتابعة كزائر.';
 
 const requireAuth = (): Auth => {
   if (!authInstance) throw new Error(firebaseSetupMessage);

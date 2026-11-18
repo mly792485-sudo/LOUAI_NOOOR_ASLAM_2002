@@ -86,7 +86,7 @@ export default function EmailAuthSection({ onSuccess, onGuest }: Props) {
   };
 
   return (
-    <div className="auth-form mx-auto mt-8 max-w-xl rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-right">
+    <div className="auth-form mx-auto mt-0 max-w-xl rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-right">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/25"><Mail className="h-5 w-5" /></div>
         <div><h2 className="font-kufi font-black text-white">حساب البريد الإلكتروني</h2><p className="text-xs text-slate-400">تسجيل دخول آمن عبر Firebase</p></div>
