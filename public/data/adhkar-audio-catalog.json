@@ -3,16 +3,16 @@
   "description": "كتالوج أصوات الأذكار؛ لا يوجد fallback بين الأقسام أو الأذكار.",
   "categories": {
     "morning": {
-      "alafasy": { "url": "/audio/adhkar_morning.mp3", "kind": "category", "verified": true }
+      "alafasy": { "url": "/audio/adhkar_morning.mp3", "kind": "category", "verified": true, "durationSeconds": 1265.293 }
     },
     "evening": {
-      "alafasy": { "url": "/audio/adhkar_evening.mp3", "kind": "category", "verified": true }
+      "alafasy": { "url": "/audio/adhkar_evening.mp3", "kind": "category", "verified": true, "durationSeconds": 1257.221 }
     },
     "sleep": {
-      "alafasy": { "url": "/audio/adhkar_sleep.mp3", "kind": "category", "verified": true }
+      "alafasy": { "url": "/audio/adhkar_sleep.mp3", "kind": "category", "verified": true, "durationSeconds": 634.488 }
     },
     "tahajjud": {
-      "alafasy": { "url": "/audio/adhkar_witr.mp3", "kind": "category", "verified": true }
+      "alafasy": { "url": "/audio/adhkar_witr.mp3", "kind": "category", "verified": true, "durationSeconds": 32.496 }
     }
   },
   "items": {}

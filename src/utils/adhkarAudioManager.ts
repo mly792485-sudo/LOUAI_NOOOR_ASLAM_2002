@@ -4,6 +4,7 @@ export interface AdhkarAudioRecord {
   url: string;
   kind: AdhkarAudioKind;
   verified?: boolean;
+  durationSeconds?: number;
 }
 
 interface AdhkarAudioCatalog {
