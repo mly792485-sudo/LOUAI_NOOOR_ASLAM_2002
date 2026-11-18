@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CalculationMethod, Coordinates, HighLatitudeRule, Madhab, PrayerTimes } from 'adhan';
+
 export interface CityInfo {
   ar: string;
   en: string;
@@ -432,6 +434,67 @@ const writeCachedPrayerTimes = (key: string, value: unknown) => {
   }
 };
 
+const localCalculationParameters = (method: string, countryCode: string) => {
+  let parameters = method === 'UmmAlQura'
+    ? CalculationMethod.UmmAlQura()
+    : method === 'Egypt'
+      ? CalculationMethod.Egyptian()
+      : method === 'Karachi'
+        ? CalculationMethod.Karachi()
+        : method === 'ISNA'
+          ? CalculationMethod.NorthAmerica()
+          : method === 'Diyanet'
+            ? CalculationMethod.Turkey()
+            : method === 'GulfRegion'
+              ? CalculationMethod.Dubai()
+              : method === 'MWL'
+                ? CalculationMethod.MuslimWorldLeague()
+                : CalculationMethod.Other();
+  if (method === 'Auto') {
+    parameters = countryCode === 'SA' ? CalculationMethod.UmmAlQura()
+      : countryCode === 'EG' ? CalculationMethod.Egyptian()
+        : countryCode === 'AE' ? CalculationMethod.Dubai()
+          : countryCode === 'TR' ? CalculationMethod.Turkey()
+            : CalculationMethod.MuslimWorldLeague();
+  }
+  return parameters;
+};
+
+const formatLocalTime = (value: Date | null) => {
+  if (!value || Number.isNaN(value.getTime())) return undefined;
+  return `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
+};
+
+const calculateLocalPrayerTimes = (
+  coordinates: { latitude: number; longitude: number } | undefined,
+  date: Date,
+  method: string,
+  countryCode: string,
+  madhhab: 'standard' | 'hanafi',
+  highLatitudeRule: 'none' | 'angleBased' | 'oneSeventh' | 'middleOfTheNight',
+  offsets: Partial<Record<'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha', number>>,
+) => {
+  if (!coordinates || !Number.isFinite(coordinates.latitude) || !Number.isFinite(coordinates.longitude)) return null;
+  const parameters = localCalculationParameters(method, countryCode);
+  parameters.madhab = madhhab === 'hanafi' ? Madhab.Hanafi : Madhab.Shafi;
+  const localCoordinates = new Coordinates(coordinates.latitude, coordinates.longitude);
+  parameters.highLatitudeRule = highLatitudeRule === 'angleBased' ? HighLatitudeRule.TwilightAngle
+    : highLatitudeRule === 'oneSeventh' ? HighLatitudeRule.SeventhOfTheNight
+      : highLatitudeRule === 'middleOfTheNight' ? HighLatitudeRule.MiddleOfTheNight
+        : HighLatitudeRule.recommended(localCoordinates);
+  const calculated = new PrayerTimes(localCoordinates, date, parameters);
+  const rawTimes = {
+    Fajr: formatLocalTime(calculated.fajr),
+    Sunrise: formatLocalTime(calculated.sunrise),
+    Dhuhr: formatLocalTime(calculated.dhuhr),
+    Asr: formatLocalTime(calculated.asr),
+    Maghrib: formatLocalTime(calculated.maghrib),
+    Isha: formatLocalTime(calculated.isha),
+  };
+  if (!Object.values(rawTimes).every(Boolean)) return null;
+  return applyLocalOffsets(rawTimes as Record<keyof typeof rawTimes, string>, offsets);
+};
+
 // Fetch or calculate accurate timings.
 export async function getAccuratePrayerTimes(
   countryName: string = 'مملكة البحرين',
@@ -512,6 +575,19 @@ export async function getAccuratePrayerTimes(
   const cached = readCachedPrayerTimes(cacheKey);
   if (cached?.times) {
     return { ...cached, source: 'cached-api' };
+  }
+
+  const localTimes = calculateLocalPrayerTimes(coordinates, date, method, effectiveCountryCode, madhhab, highLatitudeRule, offsets);
+  if (localTimes) {
+    return {
+      source: 'local-calculation',
+      sourceUrl: 'local://adhan-calculation',
+      country: knownCountry ? country.ar : (countryName || country.ar),
+      city: coordinates ? 'موقعك الحالي' : city.ar,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+      hijriDate: getHijriDate(date),
+      times: localTimes,
+    };
   }
 
   throw new Error('لا توجد مواقيت موثوقة لهذا اليوم. اتصل بالإنترنت ثم أعد المحاولة.');
