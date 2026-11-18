@@ -30,7 +30,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
         sender: 'assistant',
         text: isEn
           ? 'Peace be upon you! Welcome to **Noor Al-Islam AI Assistant**. I am here to help answer your Islamic and religious questions based on the Holy Quran, Sahih Al-Bukhari, Sahih Muslim, and authentic Sunnah.\n\nHow may I assist you with your faith and worship today?'
-          : 'السلام عليكم ورحمة الله وبركاته، أهلاً بك في **مستشار نور الإسلام الذكي**. أنا هنا للإجابة عن تساؤلاتك الشرعية والتعليمية والدينية وتوفير الفوائد الأخلاقية بالاعتماد على القرآن الكريم وصحيح البخاري ومسلم والسنة النبوية الشريفة الموثقة. \n\nكيف يمكنني مساعدتك في دينك وعبادتك اليوم؟',
+          : 'السلام عليكم ورحمة الله وبركاته، أهلاً بك في **مستشار نور الإسلام**. أنا أداة بحث مساعدة لترتيب المعلومات الإسلامية، ولست مفتياً ولا مصدراً شرعياً مستقلاً. \n\nكيف يمكنني مساعدتك في البحث عن مصدر موثوق؟',
       },
     ];
   });
@@ -57,13 +57,14 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
       ];
 
   const handleSendMessage = async (textToSend: string) => {
-    if (!textToSend.trim()) return;
+    const normalizedQuestion = textToSend.trim();
+    if (normalizedQuestion.length < 2 || normalizedQuestion.length > 800) return;
     
     const userMsgId = Date.now().toString();
     const newUserMsg: ChatMessage = {
       id: userMsgId,
       sender: 'user',
-      text: textToSend,
+      text: normalizedQuestion,
     };
 
     const assistantMsgId = (Date.now() + 1).toString();
@@ -88,7 +89,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
       let response = await fetch(`${apiBaseUrl}/api/ai/qa/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: textToSend }),
+        body: JSON.stringify({ question: normalizedQuestion }),
         signal: controller.signal,
       });
 
@@ -98,7 +99,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
         const fallbackResponse = await fetch(`${apiBaseUrl}/api/ai/qa`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question: textToSend }),
+          body: JSON.stringify({ question: normalizedQuestion }),
           signal: controller.signal,
         });
         if (fallbackResponse.ok) {
@@ -228,19 +229,19 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
             </h3>
             <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
               <Sparkles className="w-3 h-3 text-amber-500 animate-spin-slow" />
-              {isEn ? "Powered by verified Islamic reasoning & Sunnah sources" : "مدعوم بالذكاء الاصطناعي الموثوق للأحكام والسنن"}
+              {isEn ? "A research aid, not a mufti or fatwa service" : "أداة بحث مساعدة وليست مفتياً أو جهة إفتاء"}
             </p>
           </div>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          {isEn ? "Ask religious questions & explore authentic supplications" : "استفسر فقهياً، دينيّاً، أو اطلب أدعية مأثورة"}
+          {isEn ? "Explore sources and ask educational Islamic questions" : "ابحث في المعلومات الإسلامية واسأل أسئلة تعليمية"}
         </p>
       </div>
 
       {/* Warning/Disclaimer bar */}
       <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2 text-[10px] text-amber-800 dark:text-amber-300 font-medium">
         <ShieldAlert className="w-4 h-4 flex-shrink-0" />
-        <span>تنبيه: إجابات المستشار للتعليم والبيان والاسترشاد العام بالاعتماد على مراجع الفقه المعتمدة، ولا تغني عن استشارة كبار العلماء في المسائل المصيرية المعقدة.</span>
+        <span>تنبيه ثابت: هذه إجابة آلية قد تخطئ، لا تعتمدها فتوى، وراجع عالماً موثوقاً. لا تُعرض الآيات والأحاديث كنصوص موثقة إلا إذا كان مصدرها مثبتاً داخل التطبيق.</span>
       </div>
 
       {/* Chat Area */}
@@ -313,6 +314,8 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
+          minLength={2}
+          maxLength={800}
           placeholder={isEn ? "Ask an Islamic question or request a dua..." : "اكتب سؤالاً دينياً أو فقهياً هنا..."}
           disabled={isLoading}
           className="flex-1 px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder-slate-400"

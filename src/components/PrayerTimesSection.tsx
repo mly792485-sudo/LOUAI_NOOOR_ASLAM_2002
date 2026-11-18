@@ -31,7 +31,8 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
   const [showWeek, setShowWeek] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [sourceType, setSourceType] = useState<'bahrain-official' | 'api-bahrain-gulf' | 'api' | 'cached-api' | 'fallback'>('bahrain-official');
+  const [sourceType, setSourceType] = useState<'bahrain-official' | 'api-bahrain-gulf' | 'api' | 'cached-api' | 'fallback'>('api');
+  const [timeZone, setTimeZone] = useState<string | undefined>(undefined);
 
   const getPrayerDisplayName = (pName: string, arName: string) => {
     if (!isEn) return arName;
@@ -96,6 +97,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
         setHijriDateStr('');
       }
       setSourceType(res.source as 'bahrain-official' | 'api-bahrain-gulf' | 'api' | 'cached-api' | 'fallback');
+      setTimeZone(res.timeZone);
 
       const times = res.times;
       setAdditionalTimes(res.additionalTimes || {});
@@ -283,7 +285,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
             <div className="flex flex-wrap items-center gap-2 mt-1.5">
               <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100/70 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 rounded-xl text-xs font-extrabold">
                 <span>📅 {isEn ? 'Gregorian:' : 'الميلادي:'}</span>
-                <span>{new Date().toLocaleDateString(isEn ? 'en-US' : 'ar-SA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                <span>{new Intl.DateTimeFormat(isEn ? 'en-US' : 'ar-SA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', ...(timeZone ? { timeZone } : {}) }).format(currentTime)}</span>
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-100/70 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60 rounded-xl text-xs font-extrabold">
                 <span>🌙 {isEn ? 'Hijri:' : 'الهجري:'}</span>

@@ -410,8 +410,10 @@ const getHijriDate = (date: Date) => {
   }
 };
 
-const prayerCacheKey = (country: string, city: string, date: Date, method: string, methodId: number, coordinates?: { latitude: number; longitude: number }) =>
-  `noor-prayer-times-v4:${country}:${city}:${formatApiDate(date)}:${method}:${methodId}:${coordinates ? `${coordinates.latitude.toFixed(3)},${coordinates.longitude.toFixed(3)}` : 'city'}`;
+const prayerCacheKey = (country: string, city: string, date: Date, method: string, methodId: number, coordinates?: { latitude: number; longitude: number }) => {
+  const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
+  return `noor-prayer-times-v5:${country}:${city}:${formatApiDate(date)}:${deviceTimeZone}:${method}:${methodId}:${coordinates ? `${coordinates.latitude.toFixed(3)},${coordinates.longitude.toFixed(3)}` : 'city'}`;
+};
 
 const readCachedPrayerTimes = (key: string) => {
   try {
@@ -477,6 +479,7 @@ export async function getAccuratePrayerTimes(
           sourceUrl: endpoint,
           country: knownCountry ? country.ar : (countryName || country.ar),
           city: coordinates ? 'موقعك الحالي' : city.ar,
+          timeZone: typeof json.data.meta?.timezone === 'string' ? json.data.meta.timezone : undefined,
           hijriDate: json.data.date?.hijri ? `${json.data.date.hijri.day} ${json.data.date.hijri.month.ar} ${json.data.date.hijri.year} هـ` : getHijriDate(date),
           additionalTimes: {
             Imsak: typeof t.Imsak === 'string' ? t.Imsak.substring(0, 5) : undefined,

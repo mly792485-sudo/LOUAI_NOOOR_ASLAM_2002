@@ -14,7 +14,50 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 
-app.use(express.json());
+app.use(express.json({ limit: "12kb" }));
+
+app.use((error: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (error?.type === "entity.too.large") return assistantError(res, 413);
+  if (error?.type === "entity.parse.failed") {
+    return res.status(400).json({ error: "صيغة الطلب غير صالحة." });
+  }
+  return next(error);
+});
+
+const ASSISTANT_LIMIT = 10;
+const ASSISTANT_WINDOW_MS = 60_000;
+const assistantRequests = new Map<string, number[]>();
+const ASSISTANT_DISCLAIMER = "تنبيه: هذه إجابة آلية قد تخطئ، ولا تُعد فتوى. راجع عالمًا موثوقًا في المسائل الشرعية المهمة.";
+
+function assistantClientKey(req: express.Request) {
+  const forwarded = req.headers["x-forwarded-for"];
+  return typeof forwarded === "string" ? forwarded.split(",")[0].trim() : req.ip || "unknown";
+}
+
+function allowAssistantRequest(req: express.Request) {
+  const now = Date.now();
+  const key = assistantClientKey(req);
+  const recent = (assistantRequests.get(key) || []).filter((time) => now - time < ASSISTANT_WINDOW_MS);
+  if (recent.length >= ASSISTANT_LIMIT) {
+    assistantRequests.set(key, recent);
+    return false;
+  }
+  recent.push(now);
+  assistantRequests.set(key, recent);
+  return true;
+}
+
+function readQuestion(body: unknown) {
+  const question = (body as { question?: unknown } | null)?.question;
+  if (typeof question !== "string") return { error: "INVALID_QUESTION" } as const;
+  const normalized = question.trim();
+  if (normalized.length < 2 || normalized.length > 800) return { error: "QUESTION_LENGTH" } as const;
+  return { question: normalized } as const;
+}
+
+function assistantError(res: express.Response, status = 500) {
+  return res.status(status).json({ error: "تعذر الاتصال بالمستشار الآن، حاول لاحقاً." });
+}
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'noor-al-islam-assistant' });
@@ -29,10 +72,8 @@ app.use((req, res, next) => {
     .filter(Boolean);
   const requestOrigin = req.headers.origin || '';
   const nativeOrigin = /^(capacitor|ionic|http):\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(requestOrigin);
-  const allowedOrigin = configuredOrigins.length === 0 || configuredOrigins.includes(requestOrigin) || nativeOrigin
-    ? (requestOrigin || '*')
-    : configuredOrigins[0];
-  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  const isAllowed = !requestOrigin || configuredOrigins.includes(requestOrigin) || nativeOrigin;
+  if (requestOrigin && isAllowed) res.setHeader('Access-Control-Allow-Origin', requestOrigin);
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -57,7 +98,7 @@ function getOpenAIConfig() {
   };
 }
 
-async function openAIChat(messages: Array<{ role: string; content: string }>, stream = false) {
+async function openAIChat(messages: Array<{ role: string; content: string }>, stream = false, signal?: AbortSignal) {
   const config = getOpenAIConfig();
   const response = await fetch(config.url, {
     method: "POST",
@@ -65,7 +106,8 @@ async function openAIChat(messages: Array<{ role: string; content: string }>, st
       Authorization: `Bearer ${config.apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ model: config.model, messages, temperature: 0.2, stream }),
+    body: JSON.stringify({ model: config.model, messages, temperature: 0.2, stream, max_tokens: 900 }),
+    signal,
   });
   if (!response.ok) {
     const detail = await response.text();
@@ -86,11 +128,15 @@ app.post("/api/ai/tafsir", async (req, res) => {
 
 // 2. API route for Islamic Q&A Companion (Streaming for real-time speed)
 app.post("/api/ai/qa/stream", async (req, res) => {
+  if (!allowAssistantRequest(req)) return assistantError(res, 429);
+  const parsedQuestion = readQuestion(req.body);
+  if ("error" in parsedQuestion) return assistantError(res, 400);
+  const requestController = new AbortController();
+  let completed = false;
+  req.once("aborted", () => requestController.abort());
+  res.once("close", () => { if (!completed) requestController.abort(); });
   try {
-    const { question } = req.body;
-    if (!question) {
-      return res.status(400).json({ error: "question is required" });
-    }
+    const { question } = parsedQuestion;
 
     const systemInstruction = `أنت مساعد بحث إسلامي اسمه "مستشار نور الإسلام" ولست مفتياً مستقلاً.
 أجب فقط بما تستطيع نسبته بأمان إلى مصادر محددة: القرآن الكريم، صحيح البخاري، صحيح مسلم، وكتب العلماء المعروفة. لا تخترع آية أو حديثاً أو رقماً أو قولاً، ولا تنسب نصاً لمصدر لم تتحقق منه. إذا لم تكن متأكداً فقل بوضوح: "لا أستطيع التحقق من هذه النسبة الآن" ولا تملأ الفراغ بتخمين.
@@ -102,11 +148,12 @@ app.post("/api/ai/qa/stream", async (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    res.write(`data: ${JSON.stringify({ text: `${ASSISTANT_DISCLAIMER}\n\n` })}\n\n`);
 
     const responseStream = await openAIChat([
       { role: "system", content: systemInstruction },
       { role: "user", content: question },
-    ], true);
+    ], true, requestController.signal);
     if (!responseStream.body) throw new Error("OpenAI returned no response body");
     const reader = responseStream.body.getReader();
     const decoder = new TextDecoder();
@@ -130,13 +177,15 @@ app.post("/api/ai/qa/stream", async (req, res) => {
       }
     }
     res.write("data: [DONE]\n\n");
+    completed = true;
     res.end();
   } catch (error: any) {
     console.error("Streaming Q&A Error:", error);
+    if (requestController.signal.aborted) return;
     if (!res.headersSent) {
-      res.status(500).json({ error: error.message || "حدث خطأ أثناء الاتصال بمستشار نور الإسلام" });
+      assistantError(res);
     } else {
-      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+      res.write(`data: ${JSON.stringify({ error: "تعذر الاتصال بالمستشار الآن، حاول لاحقاً." })}\n\n`);
       res.end();
     }
   }
@@ -144,23 +193,29 @@ app.post("/api/ai/qa/stream", async (req, res) => {
 
 // 2b. Standard fallback API route for Islamic Q&A
 app.post("/api/ai/qa", async (req, res) => {
+  if (!allowAssistantRequest(req)) return assistantError(res, 429);
+  const parsedQuestion = readQuestion(req.body);
+  if ("error" in parsedQuestion) return assistantError(res, 400);
+  const requestController = new AbortController();
+  let completed = false;
+  req.once("aborted", () => requestController.abort());
+  res.once("close", () => { if (!completed) requestController.abort(); });
   try {
-    const { question } = req.body;
-    if (!question) {
-      return res.status(400).json({ error: "question is required" });
-    }
+    const { question } = parsedQuestion;
 
     const systemInstruction = `أنت مساعد بحث إسلامي اسمه "مستشار نور الإسلام". أجب من القرآن الكريم وصحيح البخاري وصحيح مسلم والمصادر العلمية المعروفة فقط، ولا تخترع نصوصاً أو أرقاماً. يجب أن تختم كل إجابة بقسم "المصادر" يذكر المرجع ورقم الحديث أو السورة والآية متى أمكن. إذا لم تتأكد فصرّح بعدم القدرة على التحقق. لا تعط فتوى قطعية في الطلاق والمواريث والتكفير والدماء والمعاملات المعقدة، بل وجّه إلى عالم أو جهة إفتاء رسمية.`;
 
     const response = await openAIChat([
       { role: "system", content: systemInstruction },
       { role: "user", content: question },
-    ]);
+    ], false, requestController.signal);
     const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-    res.json({ text: data.choices?.[0]?.message?.content || "تعذر الحصول على إجابة من الخادم." });
+    completed = true;
+    res.json({ text: `${ASSISTANT_DISCLAIMER}\n\n${data.choices?.[0]?.message?.content || "تعذر الحصول على إجابة من الخادم."}` });
   } catch (error: any) {
     console.error("Islamic Q&A API Error:", error);
-    res.status(500).json({ error: error.message || "حدث خطأ أثناء الاتصال بمستشار نور الإسلام" });
+    if (requestController.signal.aborted) return;
+    assistantError(res);
   }
 });
 
@@ -286,9 +341,9 @@ app.get("/privacy-policy", (req, res) => {
 <body>
   <div class="container">
     <div class="header">
-      <span class="badge">وثيقة معتمدة ومطابقة لمتجر App Store</span>
+      <span class="badge">سياسة الخصوصية</span>
       <h1>سياسة الخصوصية لتطبيق "نور الإسلام"</h1>
-      <p class="subtitle">تاريخ آخر تحديث: 2026</p>
+      <p class="subtitle">تاريخ آخر تحديث: 14 نوفمبر 2026</p>
     </div>
 
     <div class="section">
@@ -298,17 +353,17 @@ app.get("/privacy-policy", (req, res) => {
 
     <div class="section">
       <h2>جمع البيانات</h2>
-      <p>لا يطلب التطبيق إنشاء حساب لتشغيل القرآن والأذكار ومواقيت الصلاة والقبلة، ولا نطلب الاسم أو رقم الهاتف أو البريد الإلكتروني. عند استخدام مستشار نور الإسلام، يُرسل نص السؤال إلى خادم التطبيق ثم إلى مزود الذكاء الاصطناعي لمعالجة الرد؛ لذلك لا تكتب معلومات شخصية أو سرية داخل السؤال.</p>
+      <p>لا يطلب التطبيق إنشاء حساب لتشغيل القرآن والأذكار ومواقيت الصلاة والقبلة، ولا نطلب الاسم أو رقم الهاتف أو البريد الإلكتروني للميزات الأساسية. عند استخدام مستشار نور الإسلام، يُرسل نص السؤال إلى خادم التطبيق ثم إلى مزود الذكاء الاصطناعي لمعالجة الرد؛ لذلك لا تكتب معلومات شخصية أو سرية داخل السؤال.</p>
     </div>
 
     <div class="section">
       <h2>أذونات الجهاز والمعالجة المحلية</h2>
-      <p>قد يتطلب التطبيق إذن الإشعارات لتنبيهات الصلاة والأذان، وإذن الموقع لتحديد مواقيت الصلاة واتجاه القبلة. يُستخدم الموقع داخل ميزات التطبيق ولا نبيعه أو نستخدمه للإعلانات. أما أسئلة المستشار فتعالج عبر خادم التطبيق ومزود الذكاء الاصطناعي كما هو موضح أعلاه.</p>
+      <p>قد يتطلب التطبيق إذن الإشعارات لتنبيهات الصلاة والأذان، وإذن الموقع لتحديد المدينة ومواقيت الصلاة واتجاه القبلة. عند تفعيل الموقع، قد تُرسل الإحداثيات إلى AlAdhan لحساب المواقيت وإلى OpenStreetMap Nominatim لتحويل الإحداثيات إلى اسم مدينة. يمكنك رفض الإذن واختيار المدينة يدوياً.</p>
     </div>
 
     <div class="section">
       <h2>خدمات الأطراف الثالثة</h2>
-      <p>لا نستخدم شبكات إعلانية ولا نبيع بيانات المستخدمين. يعتمد المستشار على مزود ذكاء اصطناعي خارجي لمعالجة السؤال الذي يكتبه المستخدم، ولا ينبغي إرسال بيانات شخصية أو حساسة إليه.</p>
+      <p>يستخدم التطبيق AlAdhan لمواقيت الصلاة، وOpenStreetMap Nominatim للتحويل العكسي للموقع، ومزود ذكاء اصطناعي لمعالجة سؤال المستشار. قد يتلقى كل مزود البيانات اللازمة لتقديم خدمته وفق سياسته الخاصة. لا نستخدم شبكات إعلانية ولا نبيع بيانات المستخدمين، ولا ينبغي إرسال بيانات شخصية أو حساسة إلى المستشار.</p>
     </div>
 
     <div class="section">
@@ -318,7 +373,7 @@ app.get("/privacy-policy", (req, res) => {
 
     <div class="section">
       <h2>التواصل معنا</h2>
-      <p>إذا كانت لديك أي استفسارات أو ملاحظات حول سياسة الخصوصية، يسعدنا تواصلك مع مطور التطبيق مباشرة.</p>
+      <p>إذا كانت لديك أي استفسارات أو ملاحظات حول سياسة الخصوصية، تواصل معنا عبر البريد: <a href="mailto:lwya0721@gmail.com">lwya0721@gmail.com</a></p>
     </div>
 
     <div class="english-box">

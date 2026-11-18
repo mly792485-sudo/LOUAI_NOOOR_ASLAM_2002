@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Loader2, Minus, Plus, RotateCcw, Search, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, List, Loader2, Minus, Plus, RotateCcw, Search, X } from 'lucide-react';
 import { quranMetadata } from '../data/quran_metadata';
 
 type MushafMetadata = { juz_number?: number; hizb_number?: number; chapter_id?: number };
@@ -18,13 +18,34 @@ export default function MushafPageReader({ isEn = false, onClose }: MushafPageRe
   const [zoom, setZoom] = useState(1);
   const [retry, setRetry] = useState(0);
   const [showPicker, setShowPicker] = useState(false);
+  const [showDirectory, setShowDirectory] = useState(false);
   const [selectedSurah, setSelectedSurah] = useState(1);
   const [ayah, setAyah] = useState('1');
+  const [pageInput, setPageInput] = useState('1');
+  const [transitionDirection, setTransitionDirection] = useState<'next' | 'previous'>('next');
   const [jumping, setJumping] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const pinchStartDistance = useRef<number | null>(null);
   const pinchStartZoom = useRef(1);
+  const zoomRef = useRef(1);
+  const pendingZoomRef = useRef(1);
+  const zoomFrameRef = useRef<number | null>(null);
   const imageUrl = `${IMAGE_BASE}/${String(page).padStart(3, '0')}.png`;
+
+  const setZoomSmoothly = (value: number) => {
+    const nextZoom = Math.max(1, Math.min(3, value));
+    zoomRef.current = nextZoom;
+    pendingZoomRef.current = nextZoom;
+    if (zoomFrameRef.current !== null) return;
+    zoomFrameRef.current = requestAnimationFrame(() => {
+      setZoom(pendingZoomRef.current);
+      zoomFrameRef.current = null;
+    });
+  };
+
+  useEffect(() => () => {
+    if (zoomFrameRef.current !== null) cancelAnimationFrame(zoomFrameRef.current);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,8 +69,15 @@ export default function MushafPageReader({ isEn = false, onClose }: MushafPageRe
   const go = (nextPage: number) => {
     const safePage = Math.max(1, Math.min(PAGE_COUNT, Math.round(nextPage)));
     if (safePage === page) { setRetry((value) => value + 1); return; }
+    setTransitionDirection(safePage > page ? 'next' : 'previous');
     setPage(safePage);
-    setZoom(1);
+    setPageInput(String(safePage));
+    setZoomSmoothly(1);
+  };
+
+  const goToPage = () => {
+    const requested = Number.parseInt(pageInput, 10);
+    if (Number.isFinite(requested)) go(requested);
   };
 
   const jumpToAyah = async () => {
@@ -72,34 +100,35 @@ export default function MushafPageReader({ isEn = false, onClose }: MushafPageRe
   return (
     <section className="fixed inset-0 z-[1200] bg-[#0b1716] text-white flex flex-col" dir="rtl"
       onTouchStart={(event) => {
-        if (event.touches.length === 2) { pinchStartDistance.current = distance(event.touches[0], event.touches[1]); pinchStartZoom.current = zoom; touchStartX.current = null; }
+        if (event.touches.length === 2) { pinchStartDistance.current = distance(event.touches[0], event.touches[1]); pinchStartZoom.current = zoomRef.current; touchStartX.current = null; }
         else touchStartX.current = event.changedTouches[0]?.clientX ?? null;
       }}
       onTouchMove={(event) => {
         if (event.touches.length === 2 && pinchStartDistance.current) {
           const next = pinchStartZoom.current * (distance(event.touches[0], event.touches[1]) / pinchStartDistance.current);
-          setZoom(Math.max(1, Math.min(3, next)));
+          setZoomSmoothly(next);
         }
       }}
       onTouchEnd={(event) => {
         if (pinchStartDistance.current) { pinchStartDistance.current = null; return; }
-        if (zoom !== 1 || touchStartX.current == null) return;
+        if (zoomRef.current !== 1 || touchStartX.current == null) return;
         const delta = (event.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
         if (Math.abs(delta) > 55) go(page + (delta < 0 ? 1 : -1));
         touchStartX.current = null;
       }}>
       <header className="shrink-0 flex items-center justify-between gap-2 px-3 pt-[max(10px,env(safe-area-inset-top))] pb-2 bg-emerald-950 shadow-lg">
         <button type="button" onClick={onClose} className="p-2 rounded-xl bg-white/10" aria-label="إغلاق المصحف"><X className="w-5 h-5" /></button>
-        <div className="text-center min-w-0"><h2 className="font-black text-amber-300 text-sm sm:text-base">المصحف الشريف</h2><p className="text-[10px] text-emerald-200 truncate">{surah ? `سورة ${surah.name} · ` : ''}صفحة {page} من {PAGE_COUNT}</p></div>
+        <div className="text-center min-w-0"><p className="text-[10px] text-emerald-200 truncate">الجزء {metadata?.juz_number ?? '—'}</p><h2 className="font-black text-amber-300 text-sm sm:text-base truncate">{surah ? `سورة ${surah.name}` : 'المصحف الشريف'}</h2><p className="text-[10px] text-emerald-200 truncate">صفحة {page} من {PAGE_COUNT}</p></div>
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => setZoom((value) => Math.min(3, value + .25))} className="p-2 rounded-lg bg-white/10" aria-label="تكبير"><Plus className="w-4 h-4" /></button>
-          <button type="button" onClick={() => setZoom((value) => Math.max(1, value - .25))} className="p-2 rounded-lg bg-white/10" aria-label="تصغير"><Minus className="w-4 h-4" /></button>
-          <button type="button" onClick={() => setZoom(1)} className="p-2 rounded-lg bg-white/10" aria-label="إعادة التكبير"><RotateCcw className="w-4 h-4" /></button>
+          <button type="button" onClick={() => setZoomSmoothly(zoomRef.current + .25)} className="p-2 rounded-lg bg-white/10" aria-label="تكبير الصفحة"><Plus className="w-4 h-4" /></button>
+          <button type="button" onClick={() => setZoomSmoothly(zoomRef.current - .25)} className="p-2 rounded-lg bg-white/10" aria-label="تصغير الصفحة"><Minus className="w-4 h-4" /></button>
+          <button type="button" onClick={() => setZoomSmoothly(1)} className="p-2 rounded-lg bg-white/10" aria-label="إعادة حجم الصفحة"><RotateCcw className="w-4 h-4" /></button>
         </div>
       </header>
 
-      <div className="shrink-0 flex justify-center gap-2 px-3 py-2 bg-emerald-950/95 border-t border-white/10">
+      <div className="shrink-0 flex flex-wrap justify-center gap-2 px-3 py-2 bg-emerald-950/95 border-t border-white/10">
         <button type="button" onClick={() => setShowPicker((value) => !value)} className="px-3 py-2 rounded-xl bg-amber-300 text-emerald-950 font-bold text-xs flex items-center gap-1"><BookOpen className="w-4 h-4" />اختيار السورة والآية</button>
+        <button type="button" onClick={() => setShowDirectory((value) => !value)} className="px-3 py-2 rounded-xl bg-white/10 text-emerald-100 font-bold text-xs flex items-center gap-1"><List className="w-4 h-4" />الفهرس</button>
         <button type="button" onClick={() => go(page - 1)} disabled={page === 1} className="p-2 rounded-xl bg-white/10 disabled:opacity-30" aria-label="السابق"><ArrowRight className="w-5 h-5" /></button>
         <button type="button" onClick={() => go(page + 1)} disabled={page === PAGE_COUNT} className="p-2 rounded-xl bg-white/10 disabled:opacity-30" aria-label="التالي"><ArrowLeft className="w-5 h-5" /></button>
       </div>
@@ -112,12 +141,26 @@ export default function MushafPageReader({ isEn = false, onClose }: MushafPageRe
         <button type="button" onClick={jumpToAyah} disabled={jumping} className="rounded-xl bg-emerald-500 px-3 py-2 font-bold text-sm">{jumping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4 inline" />} انتقال</button>
       </div>}
 
-      <main className="flex-1 min-h-0 overflow-auto p-2 sm:p-4 flex items-start justify-center overscroll-contain">
-        <div className="relative shrink-0 flex justify-center" style={{ width: `${zoom * 100}%`, minWidth: zoom > 1 ? `${zoom * 100}%` : undefined }}>
+      {showDirectory && <div className="shrink-0 p-3 bg-[#102421] border-b border-amber-300/20 space-y-2">
+        <div className="flex gap-2 items-center">
+          <label htmlFor="mushaf-page-input" className="text-xs text-emerald-100 font-bold">انتقال إلى صفحة</label>
+          <input id="mushaf-page-input" value={pageInput} onChange={(event) => setPageInput(event.target.value.replace(/\D/g, ''))} onKeyDown={(event) => { if (event.key === 'Enter') goToPage(); }} inputMode="numeric" min="1" max={PAGE_COUNT} className="w-20 rounded-xl bg-white text-slate-900 p-2 text-sm text-center" />
+          <button type="button" onClick={goToPage} className="rounded-xl bg-emerald-500 px-3 py-2 font-bold text-sm">انتقال</button>
+          <span className="text-[11px] text-emerald-200">604 صفحة · 30 جزءاً</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {quranMetadata.slice(0, 12).map((item) => <button key={item.number} type="button" onClick={() => { setSelectedSurah(item.number); setShowDirectory(false); setShowPicker(true); }} className="shrink-0 rounded-xl bg-white/10 px-3 py-2 text-xs text-emerald-100">{item.number}. {item.name}</button>)}
+        </div>
+      </div>}
+
+      <main className="flex-1 min-h-0 overflow-auto p-2 sm:p-4 flex items-start justify-center overscroll-contain" style={{ touchAction: 'pan-y' }}>
+        <div key={`${page}-${transitionDirection}`} className={`relative shrink-0 flex justify-center mushaf-page-enter ${transitionDirection === 'previous' ? 'mushaf-page-previous' : ''}`} style={{ width: `${zoom * 100}%`, minWidth: zoom > 1 ? `${zoom * 100}%` : undefined, willChange: 'transform, opacity' }}>
           {loading && <div className="absolute z-10 top-4 left-1/2 -translate-x-1/2 rounded-full bg-emerald-950/90 text-white px-3 py-2"><Loader2 className="w-5 h-5 animate-spin" /></div>}
-          {imageError ? <div className="w-full min-h-[78vh] flex flex-col items-center justify-center gap-3 rounded-lg bg-[#fffdf7] text-slate-900 text-center p-8 shadow-2xl"><p className="font-bold">تعذر تحميل صفحة المصحف الكاملة.</p><button type="button" onClick={() => { setImageError(false); setLoading(true); setRetry((value) => value + 1); }} className="px-4 py-2 rounded-xl bg-emerald-800 text-white">إعادة المحاولة</button></div> : <img key={`${imageUrl}-${retry}`} src={imageUrl} alt={`صفحة المصحف رقم ${page}`} className="block w-full h-auto object-contain rounded-sm shadow-2xl bg-white select-none" draggable={false} onLoad={() => setLoading(false)} onError={() => { setLoading(false); setImageError(true); }} />}
+          {imageError ? <div className="w-full min-h-[78vh] flex flex-col items-center justify-center gap-3 rounded-lg bg-[#fffdf7] text-slate-900 text-center p-8 shadow-2xl"><p className="font-bold">تعذر تحميل صفحة المصحف الكاملة.</p><button type="button" onClick={() => { setImageError(false); setLoading(true); setRetry((value) => value + 1); }} className="px-4 py-2 rounded-xl bg-emerald-800 text-white">إعادة المحاولة</button></div> : <img key={`${imageUrl}-${retry}`} src={imageUrl} alt={`صفحة المصحف رقم ${page}`} loading="eager" fetchPriority="high" decoding="async" className="block w-full h-auto object-contain rounded-sm shadow-2xl bg-white select-none" draggable={false} onLoad={() => setLoading(false)} onError={() => { setLoading(false); setImageError(true); }} />}
         </div>
       </main>
+
+      <style>{`@keyframes mushaf-page-next { from { opacity: .55; transform: translateX(-18px); } to { opacity: 1; transform: translateX(0); } } @keyframes mushaf-page-previous { from { opacity: .55; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } } .mushaf-page-enter { animation: mushaf-page-next 180ms ease-out; } .mushaf-page-enter.mushaf-page-previous { animation-name: mushaf-page-previous; }`}</style>
 
       <footer className="shrink-0 flex items-center justify-center gap-4 px-4 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 bg-emerald-950"><button type="button" disabled={page === 1} onClick={() => go(page - 1)} className="p-3 rounded-2xl bg-white/10 disabled:opacity-30"><ArrowRight className="w-5 h-5" /></button><div className="text-center"><span className="font-bold text-amber-300 text-lg">{page} / {PAGE_COUNT}</span><p className="text-[10px] text-emerald-200">{metadata ? `الجزء ${metadata.juz_number ?? '—'} · الحزب ${metadata.hizb_number ?? '—'}` : ''} · {Math.round(zoom * 100)}%</p></div><button type="button" disabled={page === PAGE_COUNT} onClick={() => go(page + 1)} className="p-3 rounded-2xl bg-white/10 disabled:opacity-30"><ArrowLeft className="w-5 h-5" /></button></footer>
     </section>

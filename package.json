@@ -1,5 +1,5 @@
 {
-  "name": "react-example",
+  "name": "noor-al-islam",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,7 +13,6 @@
   "dependencies": {
     "@capacitor/android": "^8.5.0",
     "@capacitor/browser": "^8.0.4",
-    "@capacitor/cli": "^8.5.0",
     "@capacitor/clipboard": "^8.0.1",
     "@capacitor/core": "^8.5.0",
     "@capacitor/geolocation": "^8.2.2",
@@ -32,13 +31,14 @@
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-markdown": "^10.1.0",
-    "recharts": "^3.9.2",
-    "vite": "^6.2.3"
+    "recharts": "^3.9.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
     "@types/express": "^4.17.21",
     "@types/jszip": "^3.4.1",
     "@types/node": "^22.14.0",
+    "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
     "tailwindcss": "^4.1.14",

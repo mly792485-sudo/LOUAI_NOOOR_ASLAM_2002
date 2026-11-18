@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Check, ChevronLeft, Globe2, LocateFixed, Loader2, MapPin, ShieldCheck, UserRound } from 'lucide-react';
 import { Geolocation } from '@capacitor/geolocation';
-import { AppSettings } from '../types';
+import { AppLanguage, AppSettings } from '../types';
 import { safeStorage } from '../utils/safeStorage';
+import EmailAuthSection from './EmailAuthSection';
 
 interface Props {
   settings: AppSettings;
   onComplete: (patch: Partial<AppSettings>) => void;
 }
 
-type Language = { code: string; label: string; native: string; rtl?: boolean };
+type Language = { code: AppLanguage; label: string; native: string; rtl?: boolean };
 
 const LANGUAGES: Language[] = [
   { code: 'ar', label: 'العربية', native: 'العربية', rtl: true },
@@ -26,7 +27,10 @@ const LANGUAGES: Language[] = [
 
 export default function OriginalOnboardingWizard({ settings, onComplete }: Props) {
   const [step, setStep] = useState(0);
-  const [language, setLanguage] = useState(safeStorage.getItem('noor_onboarding_language') || settings.language || 'ar');
+  const [language, setLanguage] = useState<AppLanguage>(() => {
+    const stored = safeStorage.getItem('noor_onboarding_language');
+    return (LANGUAGES.some((item) => item.code === stored) ? (stored as AppLanguage) : settings.language) || 'ar';
+  });
   const [gender, setGender] = useState<'male' | 'female' | null>(null);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState('');
@@ -34,7 +38,13 @@ export default function OriginalOnboardingWizard({ settings, onComplete }: Props
 
   const finish = (patch: Partial<AppSettings> = {}) => {
     safeStorage.setItem('noor_original_onboarding_complete', 'true');
-    onComplete({ language: language === 'en' ? 'en' : 'ar', ...patch });
+    onComplete({
+      language,
+      ...(gender ? { gender } : {}),
+      ...(location ? { latitude: location.latitude, longitude: location.longitude, city: location.city, country: location.country || settings.country, region: location.region } : {}),
+      ...(location?.region ? { region: location.region } : {}),
+      ...patch,
+    });
   };
 
   const locate = async () => {
@@ -77,9 +87,7 @@ export default function OriginalOnboardingWizard({ settings, onComplete }: Props
     } else if (step === 2) {
       setStep(3);
     } else {
-      finish({
-        ...(location ? { latitude: location.latitude, longitude: location.longitude, city: location.city, country: location.country || settings.country } : {}),
-      });
+      finish();
     }
   };
 
@@ -108,7 +116,7 @@ export default function OriginalOnboardingWizard({ settings, onComplete }: Props
 
         {step === 2 && <div className="mx-auto mt-8 grid max-w-xl gap-3"><button type="button" onClick={() => setGender('male')} className={`flex items-center gap-3 rounded-2xl border p-5 text-start transition ${gender === 'male' ? 'border-emerald-400 bg-emerald-500/15' : 'border-white/10 bg-white/[0.03]'}`}><UserRound className="text-emerald-300" /><span className="flex-1 font-kufi font-bold">مسلم</span>{gender === 'male' && <Check className="text-emerald-300" />}</button><button type="button" onClick={() => setGender('female')} className={`flex items-center gap-3 rounded-2xl border p-5 text-start transition ${gender === 'female' ? 'border-emerald-400 bg-emerald-500/15' : 'border-white/10 bg-white/[0.03]'}`}><UserRound className="text-emerald-300" /><span className="flex-1 font-kufi font-bold">مسلمة</span>{gender === 'female' && <Check className="text-emerald-300" />}</button><button type="button" onClick={next} className="mt-1 text-sm text-slate-400 underline underline-offset-4 hover:text-white">تخطي</button></div>}
 
-        {step === 3 && <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center"><p className="text-sm leading-7 text-slate-300">يمكنك الدخول إلى تطبيقك كزائر وحفظ الإعدادات على هذا الجهاز. لن نعرض تسجيل دخول وهميًا أو نطلب بيانات بدون خدمة مصادقة حقيقية.</p><button type="button" onClick={() => finish()} className="mt-5 w-full rounded-2xl bg-emerald-500 px-5 py-4 font-kufi font-black text-[#061011] transition hover:bg-emerald-400">الدخول إلى التطبيق</button></div>}
+        {step === 3 && <EmailAuthSection onSuccess={() => finish()} onGuest={() => finish()} />}
 
         {step < 3 && <button type="button" onClick={next} className="mx-auto mt-8 block w-full max-w-xl rounded-2xl bg-emerald-500 px-5 py-4 font-kufi font-black text-[#061011] transition hover:bg-emerald-400">متابعة</button>}
       </div>

@@ -119,13 +119,13 @@ export const requestAllPermissions = async (): Promise<boolean> => {
         });
 
         await LocalNotifications.createChannel({
-          id: "prayer_time_silent_v1",
-          name: "تنبيه دخول وقت الصلاة (صامت)",
-          description: "تنبيه نصي صامت عند دخول وقت الصلاة قبل تشغيل الأذان بخمس دقائق",
-          importance: 4,
+          id: "prayer_time_silent_v2",
+          name: "تنبيه الاستعداد للصلاة (صامت)",
+          description: "تنبيه نصي صامت قبل الأذان بمدة يحددها المستخدم",
+          importance: 2,
           visibility: 1,
           vibration: false,
-          lights: true,
+          lights: false,
           lightColor: "#10b981",
         });
 
@@ -331,15 +331,31 @@ export const scheduleAllNativeNotifications = async (
         if (!prayer.time) return;
         const [pHour, pMin] = prayer.time.split(":").map(Number);
 
-        // Exactly two prayer alerts: adhan at the real prayer time and iqama later.
-        // The old implementation sent a silent alert at the prayer time and then
-        // delayed the adhan by five minutes, which was incorrect.
+        // Three optional stages: silent preparation reminder, exact adhan, then iqama.
         if (prayer.name !== "Sunrise" && settings.adhanReminder) {
           const exactTime = new Date(targetDate);
           exactTime.setHours(pHour, pMin, 0, 0);
 
           if (exactTime.getTime() > Date.now()) {
             const adhanData = getAdhanNotification(prayer.name, prayer.arabicName);
+
+            if (settings.prePrayerReminder !== false) {
+              const minutesBefore = Math.max(1, Math.min(60, settings.prePrayerMinutes ?? 5));
+              const preparationTime = new Date(exactTime.getTime() - minutesBefore * 60 * 1000);
+              if (preparationTime.getTime() > Date.now()) {
+                notificationsToSchedule.push({
+                  id: notifIdCounter++,
+                  title: `اقترب أذان ${prayer.arabicName} 🕌`,
+                  body: `باقي ${minutesBefore} دقائق على الأذان. توضأ واستعد للصلاة.`,
+                  schedule: { at: preparationTime, allowWhileIdle: true, isExactNotification: true },
+                  channelId: "prayer_time_silent_v2",
+                  iconColor: "#10b981",
+                  actionTypeId: "PRAYER_ALERT_ACTIONS",
+                  extra: { prayer: prayer.name, type: "pre_adhan", minutesBefore },
+                });
+              }
+            }
+
             notificationsToSchedule.push({
               id: notifIdCounter++,
               title: adhanData.title,
@@ -469,11 +485,11 @@ export const scheduleAllNativeNotifications = async (
 
     if (notificationsToSchedule.length > 0) {
       // iOS and some Android versions limit pending local notifications. Keep
-      // every prayer adhan/iqama pair first; optional adhkar reminders fill
-      // the remaining slots instead of silently removing later prayer days.
+      // every prayer preparation/adhan/iqama event first; optional adhkar
+      // reminders fill remaining slots instead of silently removing prayers.
       notificationsToSchedule.sort((a, b) => {
-        const aPrayer = a.extra?.type === "adhan" || a.extra?.type === "iqama" ? 0 : 1;
-        const bPrayer = b.extra?.type === "adhan" || b.extra?.type === "iqama" ? 0 : 1;
+        const aPrayer = a.extra?.type === "pre_adhan" || a.extra?.type === "adhan" || a.extra?.type === "iqama" ? 0 : 1;
+        const bPrayer = b.extra?.type === "pre_adhan" || b.extra?.type === "adhan" || b.extra?.type === "iqama" ? 0 : 1;
         return aPrayer - bPrayer || new Date(a.schedule.at).getTime() - new Date(b.schedule.at).getTime();
       });
       const pendingSafeNotifications = notificationsToSchedule.slice(0, 60);

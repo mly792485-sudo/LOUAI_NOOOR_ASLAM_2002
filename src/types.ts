@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export type AppLanguage = 'ar' | 'en' | 'id' | 'fr' | 'ru' | 'fa' | 'tr' | 'es' | 'de' | 'ur';
+
 export interface AppSettings {
   theme: 'light' | 'dark';
-  language?: 'ar' | 'en';
+  language?: AppLanguage;
   calculationMethod: 'BahrainOfficial' | 'UmmAlQura' | 'MWL' | 'ISNA' | 'Egypt' | 'GulfRegion' | 'Karachi' | 'Diyanet';
   madhhab?: 'standard' | 'hanafi';
   prayerOffsets?: Partial<Record<'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha', number>>;
   latitude: number | null;
   longitude: number | null;
   country?: string;
+  region?: string;
   city: string;
+  gender?: 'male' | 'female';
   adhanReminder: boolean;
   prePrayerReminder?: boolean; // Reminder before prayer (e.g. 5 mins before)
   prePrayerMinutes?: number; // 5, 10, 15, or 20 minutes

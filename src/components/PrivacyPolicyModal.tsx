@@ -8,49 +8,48 @@ interface PrivacyPolicyModalProps {
 }
 
 export const PRIVACY_POLICY_TEXT_AR = `سياسة الخصوصية لتطبيق "نور الإسلام"
+آخر تحديث: 14 نوفمبر 2026
 
 مقدمة:
 نُولي في تطبيق "نور الإسلام" اهتماماً بالغاً بخصوصية المستخدمين. توضح هذه السياسة كيف نتعامل مع البيانات والمعلومات عند استخدامك لتطبيقنا.
 
 جمع البيانات:
-نحن لا نقوم بجمع أي بيانات شخصية أو حساسة عن المستخدمين (مثل الأسماء، أرقام الهواتف، البريد الإلكتروني، أو المواقع الجغرافية الحية). التطبيق مصمم لتقديم محتوى إسلامي متكامل (أذكار، قرآن كريم، مواقيت صلاة، قبلة، أدعية) دون الحاجة لتسجيل حساب أو تتبع المستخدم.
+لا يتطلب التطبيق إنشاء حساب، ولا يطلب الاسم أو رقم الهاتف أو البريد الإلكتروني لتشغيل الميزات الأساسية. عند استخدام المستشار، يُرسل السؤال الذي تكتبه إلى خادم التطبيق ومزود الذكاء الاصطناعي لمعالجة الرد؛ لذلك لا تكتب معلومات شخصية أو سرية في السؤال. لا نبيع بيانات المستخدمين ولا نستخدمها للإعلانات.
 
 أذونات الجهاز:
-قد يتطلب التطبيق بعض الأذونات الأساسية فقط لعمل بعض الميزات الحيوية (مثل إذن الإشعارات لتنبيهات الأذان والصلوات والأذكار، أو إذن تحديد الموقع التقديري لحساب مواقيت الصلاة واتجاه القبلة محلياً)، وهذه البيانات والعمليات الحسابية تتم معالجتها محلياً بنسبة 100% على جهازك ولا يتم إرسالها أو تخزينها أو مشاركتها على أي خوادم خارجية إطلاقاً.
+قد يطلب التطبيق إذن الموقع لتحديد المدينة وحساب مواقيت الصلاة واتجاه القبلة، وإذن الإشعارات للتنبيهات. عند تفعيل تحديد الموقع، قد تُرسل الإحداثيات إلى خدمة AlAdhan لحساب المواقيت وإلى OpenStreetMap Nominatim لتحويل الإحداثيات إلى اسم مدينة؛ يمكنك رفض الإذن واختيار المدينة يدوياً.
 
 خدمات الأطراف الثالثة:
-لا نشارك أي معلومات أو بيانات مع أي أطراف ثالثة أو شركات إعلانية. التطبيق خالٍ تماماً من الإعلانات التجارية المزعجة.
+يعتمد التطبيق على AlAdhan لمواقيت الصلاة، وOpenStreetMap Nominatim للتحويل العكسي للموقع، ومزود ذكاء اصطناعي لمعالجة أسئلة المستشار. قد يتلقى كل مزود البيانات اللازمة لتقديم خدمته وفق سياسته الخاصة. لا ترسل معلومات حساسة أو تعريفية داخل أسئلة المستشار.
 
 التعديلات على السياسة:
 قد نقوم بتحديث سياسة الخصوصية من وقت لآخر لمواكبة التحديثات التقنية، وسيتم نشر أي تغييرات داخل هذه الصفحة في التطبيق مباشرة.
 
 التواصل معنا:
-إذا كانت لديك أي استفسارات أو ملاحظات حول سياسة الخصوصية، يسعدنا تواصلك مع مطور التطبيق مباشرة.`;
+إذا كانت لديك أي استفسارات أو ملاحظات حول سياسة الخصوصية، تواصل معنا عبر البريد: lwya0721@gmail.com`;
 
 export const PRIVACY_POLICY_TEXT_EN = `Privacy Policy for "Noor Al-Islam"
+Last updated: November 14, 2026
 
 Introduction:
 At "Noor Al-Islam", we prioritize and strictly respect the privacy of our users. This policy outlines how we handle data and information when you use our application.
 
 Data Collection:
-We do NOT collect, store, or share any personal, sensitive, or identifiable user data (such as names, phone numbers, email addresses, or real-time location tracking). The application is designed to provide comprehensive Islamic content (Quran, Adhkar, Prayer Times, Qibla, Supplications) with zero user tracking and no account registration required.
+No account is required for core features, and we do not sell user data or use it for advertising. Questions entered into the optional assistant are sent to our backend and an AI provider for processing; do not include personal or confidential information.
 
 Device Permissions:
-The application may request minimal local device permissions purely to operate core utility features (e.g., Local Notifications for Prayer Times/Adhan alerts, and local approximate coordinates to calculate prayer timings and Qibla direction). All calculations are executed 100% locally on your device and are never transmitted to or stored on external servers.
+The app may request location for city detection, prayer times, and Qibla, and notifications for alerts. When location is enabled, coordinates may be sent to AlAdhan for prayer calculations and OpenStreetMap Nominatim for reverse geocoding. You may deny access and choose a city manually.
 
 Third-Party Services:
-We do not share any data with third parties or advertising networks. The app is completely ad-free and tracking-free.
+The app uses AlAdhan, OpenStreetMap Nominatim, and an AI provider for the assistant. These providers may receive the data required for their services under their own privacy policies. Do not submit sensitive information.
 
 Policy Updates:
 We may update this Privacy Policy periodically to reflect technical enhancements. Any updates will be displayed directly within this page in the application.
 
 Contact Us:
-If you have any questions or feedback regarding this Privacy Policy, please feel free to reach out to the developer.`;
+If you have any questions or feedback, contact: lwya0721@gmail.com`;
 
-export const APPLE_REVIEW_NOTE_EN = `Hello Apple Review Team,
-Regarding the privacy policy and data collection for 'نور الإسلام' (Noor Al-Islam) app:
-The app is an Islamic utility app (containing Quran, Adhkar, and prayer times) and does not collect, store, or share any personal user data. No user accounts or login are required. The app operates locally on the user's device.
-Thank you.`;
+export const APPLE_REVIEW_NOTE_EN = `Noor Al-Islam does not require an account. Location may be sent to AlAdhan and OpenStreetMap Nominatim when location-based features are enabled. Questions submitted to the optional assistant are sent to the app backend and an AI provider. Users should not submit sensitive personal information. Contact: lwya0721@gmail.com`;
 
 export function PrivacyPolicyModal({ isOpen, onClose, isEn = false }: PrivacyPolicyModalProps) {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
@@ -78,7 +77,7 @@ export function PrivacyPolicyModal({ isOpen, onClose, isEn = false }: PrivacyPol
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black font-kufi">
-                {isEn ? "Privacy Policy & App Store Compliance" : "سياسة الخصوصية والاعتماد لمتجر آبل (App Store)"}
+                {isEn ? "Privacy Policy" : "سياسة الخصوصية"}
               </h3>
               <p className="text-[11px] text-emerald-100/80">
                 {isEn ? "Noor Al-Islam Application" : "تطبيق نور الإسلام"}
@@ -103,16 +102,16 @@ export function PrivacyPolicyModal({ isOpen, onClose, isEn = false }: PrivacyPol
             <div className="flex items-center gap-2.5 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
               <Lock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <div className="text-xs">
-                <p className="font-bold text-emerald-950 dark:text-emerald-300">{isEn ? "Zero Data Collection" : "لا يتم جمع أي بيانات"}</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? "100% Private" : "خصوصية وأمان تام"}</p>
+                <p className="font-bold text-emerald-950 dark:text-emerald-300">{isEn ? "No account required" : "لا يتطلب حساباً"}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? "For core features" : "للميزات الأساسية"}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5 p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
               <Smartphone className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
               <div className="text-xs">
-                <p className="font-bold text-amber-950 dark:text-amber-300">{isEn ? "Local Processing" : "معالجة محلية بالكامل"}</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? "On Device Only" : "داخل جهازك فقط"}</p>
+                <p className="font-bold text-amber-950 dark:text-amber-300">{isEn ? "Permission based" : "حسب الإذن"}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? "Location & notifications" : "الموقع والإشعارات"}</p>
               </div>
             </div>
 
@@ -129,7 +128,7 @@ export function PrivacyPolicyModal({ isOpen, onClose, isEn = false }: PrivacyPol
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-black text-emerald-900 dark:text-emerald-300 font-kufi flex items-center gap-2">
-                <span>🇸🇦 نص سياسة الخصوصية الرسمي (باللغة العربية)</span>
+                <span>نص سياسة الخصوصية (باللغة العربية)</span>
               </h4>
               <button
                 id="copy-privacy-ar-btn"
@@ -156,11 +155,11 @@ export function PrivacyPolicyModal({ isOpen, onClose, isEn = false }: PrivacyPol
             </div>
           </div>
 
-          {/* 2. Apple Review Team Message (English) */}
+          {/* 2. Third-party disclosure summary */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-black text-amber-600 dark:text-amber-400 font-kufi flex items-center gap-2">
-                <span>🍎 رسالة التوضيح الجاهزة لمراجعة آبل (Apple Review Notes)</span>
+                <span>بيان مشاركة البيانات مع الخدمات الخارجية</span>
               </h4>
               <button
                 id="copy-apple-note-btn"
@@ -176,15 +175,15 @@ export function PrivacyPolicyModal({ isOpen, onClose, isEn = false }: PrivacyPol
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5" />
-                    <span>نسخ رد آبل (English)</span>
+                    <span>نسخ البيان (English)</span>
                   </>
                 )}
               </button>
             </div>
 
             <div className="p-4 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-400/30 rounded-2xl text-xs leading-relaxed text-slate-800 dark:text-slate-200 font-mono space-y-2" dir="ltr">
-              <p className="font-bold text-amber-700 dark:text-amber-400 font-sans">
-                💡 Copy and paste this exact note in App Store Connect &gt; App Review Information &gt; Notes if requested:
+                <p className="font-bold text-amber-700 dark:text-amber-400 font-sans">
+                يوضح النص التالي الخدمات الخارجية التي قد تعالج بيانات لازمة لتشغيل الميزات:
               </p>
               <div className="p-3 bg-white dark:bg-black/40 rounded-xl border border-amber-500/20 whitespace-pre-line">
                 {APPLE_REVIEW_NOTE_EN}
@@ -214,7 +213,7 @@ export function PrivacyPolicyModal({ isOpen, onClose, isEn = false }: PrivacyPol
 
         {/* Footer */}
         <div className="px-6 py-3.5 border-t border-[#EBE7DF] dark:border-[#142225] bg-[#FAF8F5] dark:bg-[#050A0B] flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
-          <span>تطبيق نور الإسلام - متوافق مع معايير App Store</span>
+          <span>تطبيق نور الإسلام — للاستفسارات: lwya0721@gmail.com</span>
           <button
             type="button"
             onClick={onClose}

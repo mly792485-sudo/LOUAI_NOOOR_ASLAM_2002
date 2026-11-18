@@ -409,7 +409,10 @@ export default function App() {
       if (permissionStatus !== 'granted' || cancelled) return;
 
       const scheduleDays: NativePrayerScheduleDay[] = [];
-      for (let dayOffset = 0; dayOffset < 7; dayOffset += 1) {
+      // Keep a three-day rolling window: it fits iOS pending-notification limits
+      // while preserving every pre-adhan, adhan, and iqama event. The window is
+      // rebuilt whenever the app opens or a location/settings value changes.
+      for (let dayOffset = 0; dayOffset < 3; dayOffset += 1) {
         const day = new Date();
         day.setHours(12, 0, 0, 0);
         day.setDate(day.getDate() + dayOffset);
@@ -533,7 +536,9 @@ export default function App() {
       computedPrayers.forEach((p) => {
         const [pHour, pMin] = p.time.split(':').map(Number);
         
-        // At prayer time show a silent reminder; the authentic adhan starts after five minutes.
+        // At prayer time play the full in-app adhan immediately. The old code
+        // showed a silent reminder and waited five minutes, which made the
+        // audio appear to stop when the notification was dismissed.
         if (p.name !== 'Sunrise' && p.time === currentHHMM) {
           const uniqueTriggerId = `${todayStr}-${p.name}-${p.time}-time-reminder`;
           if (!triggeredList.includes(uniqueTriggerId)) {
@@ -544,7 +549,7 @@ export default function App() {
               if ('Notification' in window && Notification.permission === 'granted') {
                 try {
                   new Notification(`حان وقت صلاة ${p.arabicName}`, {
-                    body: `حان الآن وقت صلاة ${p.arabicName} في ${settings.city}. سيبدأ الأذان بعد 5 دقائق.\n${info?.supplication || ''}`,
+                    body: `حان الآن وقت صلاة ${p.arabicName} في ${settings.city}. بدأ الأذان الآن.\n${info?.supplication || ''}`,
                     icon: settings.appLogoUrl || defaultLogo,
                     dir: 'rtl'
                   });
@@ -566,19 +571,11 @@ export default function App() {
               });
             }
 
-            // Keep the exact-time reminder separate from the adhan trigger.
-            window.setTimeout(() => {
-              playAdhanAudio(settings.selectedAdhanVoice || 'makkah-ali-mulla', 1.0);
-              if ('Notification' in window && Notification.permission === 'granted') {
-                try {
-                  new Notification(`بدأ الآن أذان صلاة ${p.arabicName}`, {
-                    body: 'حيّ على الصلاة، حيّ على الفلاح. تقبل الله طاعتكم.',
-                    icon: settings.appLogoUrl || defaultLogo,
-                    dir: 'rtl'
-                  });
-                } catch (err) {}
-              }
-            }, 5 * 60 * 1000);
+            // Foreground WebView playback is independent of the notification,
+            // so dismissing the notification does not stop the full recording.
+            if (settings.soundEnabled) {
+              void playAdhanAudio(settings.selectedAdhanVoice || 'makkah-ali-mulla', 1.0);
+            }
 
             // Append to triggered list to prevent duplicate triggers in the same minute
             triggeredList.push(uniqueTriggerId);
