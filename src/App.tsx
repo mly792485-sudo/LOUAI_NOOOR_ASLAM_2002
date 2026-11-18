@@ -40,7 +40,8 @@ import {
   Smartphone,
   RotateCw,
   Library,
-  Calculator
+  Calculator,
+  CircleUserRound
 } from 'lucide-react';
 
 import { AppSettings } from './types';
@@ -68,6 +69,7 @@ import DailyWorshipSection from './components/DailyWorshipSection';
 import IslamicCalendarSection from './components/IslamicCalendarSection';
 import ZakatCalculatorSection from './components/ZakatCalculatorSection';
 import OriginalOnboardingWizard from './components/OriginalOnboardingWizard';
+import AccountModal from './components/AccountModal';
 import { ISLAMIC_AVATARS } from './assets/avatars';
 import { requestAllPermissions, scheduleAllNativeNotifications, checkPermissionsStatus, NativePrayerScheduleDay } from './utils/nativeNotifications';
 import { playAdhanAudio, stopAdhanAudio, playPrePrayerChime } from './utils/adhanPlayer';
@@ -118,6 +120,7 @@ const PRAYERS_INFO = {
 
 export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isAccountOpen, setIsAccountOpen] = useState<boolean>(false);
   const [isSearchFavModalOpen, setIsSearchFavModalOpen] = useState<boolean>(false);
   const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(() => {
     return safeStorage.getItem('noor_hide_welcome_splash') !== 'true'
@@ -1270,6 +1273,19 @@ export default function App() {
             </div>
           </button>
 
+          {/* 4. Account Button */}
+          <button
+            id="account-modal-btn"
+            onClick={() => setIsAccountOpen(true)}
+            className="w-11 h-11 p-[2px] rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-amber-400 shadow-md transition-all active:scale-90 hover:scale-105 cursor-pointer flex items-center justify-center shrink-0"
+            title={isEn ? "Account & Login" : "الحساب وتسجيل الدخول"}
+            aria-label={isEn ? "Account" : "الحساب"}
+          >
+            <div className="w-full h-full rounded-full bg-[#061214] flex items-center justify-center">
+              <CircleUserRound className="w-[22px] h-[22px] text-[#A7F3D0]" />
+            </div>
+          </button>
+
           {/* 5. Settings Button */}
           <button
             id="settings-modal-btn"
@@ -1689,6 +1705,12 @@ export default function App() {
         settings={settings}
         onUpdateSettings={handleUpdateSettings}
         onTriggerAdhanPreview={handleTriggerAdhanPreview}
+      />
+
+      <AccountModal
+        isOpen={isAccountOpen}
+        onClose={() => setIsAccountOpen(false)}
+        isEn={isEn}
       />
 
       {/* Official App Store Privacy Policy Modal */}
