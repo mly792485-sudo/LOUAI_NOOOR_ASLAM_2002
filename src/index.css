@@ -84,6 +84,16 @@ textarea,
   -webkit-touch-callout: default;
 }
 
+/* iOS Safari/WebView zooms focused fields below 16px. Keep auth fields stable. */
+.auth-form input,
+.auth-form textarea,
+.auth-form select {
+  min-height: 48px;
+  font-size: 16px !important;
+  line-height: 1.35;
+  touch-action: manipulation;
+}
+
 [dir="ltr"] body,
 [dir="ltr"] button,
 [dir="ltr"] input,

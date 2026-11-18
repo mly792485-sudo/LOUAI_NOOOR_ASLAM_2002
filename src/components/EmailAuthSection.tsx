@@ -86,15 +86,15 @@ export default function EmailAuthSection({ onSuccess, onGuest }: Props) {
   };
 
   return (
-    <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-right">
+    <div className="auth-form mx-auto mt-8 max-w-xl rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-right">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/25"><Mail className="h-5 w-5" /></div>
         <div><h2 className="font-kufi font-black text-white">حساب البريد الإلكتروني</h2><p className="text-xs text-slate-400">تسجيل دخول آمن عبر Firebase</p></div>
       </div>
-      {mode === 'register' && <input value={name} onChange={(event) => setName(event.target.value)} placeholder="الاسم" autoComplete="name" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none focus:border-emerald-400" />}
-      <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="البريد الإلكتروني" type="email" autoComplete="email" dir="ltr" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none focus:border-emerald-400" />
-      <input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="كلمة المرور" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} dir="ltr" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none focus:border-emerald-400" />
-      {mode === 'register' && <input value={confirm} onChange={(event) => setConfirm(event.target.value)} placeholder="تأكيد كلمة المرور" type="password" autoComplete="new-password" dir="ltr" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none focus:border-emerald-400" />}
+      {mode === 'register' && <input value={name} onChange={(event) => setName(event.target.value)} placeholder="الاسم" autoComplete="name" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-[16px] text-white outline-none focus:border-emerald-400" />}
+      <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="البريد الإلكتروني" type="email" autoComplete="email" dir="ltr" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-[16px] text-white outline-none focus:border-emerald-400" />
+      <input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="كلمة المرور" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} dir="ltr" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-[16px] text-white outline-none focus:border-emerald-400" />
+      {mode === 'register' && <input value={confirm} onChange={(event) => setConfirm(event.target.value)} placeholder="تأكيد كلمة المرور" type="password" autoComplete="new-password" dir="ltr" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-[16px] text-white outline-none focus:border-emerald-400" />}
       {message && <div className="mb-3 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-xs leading-6 text-amber-100">{message}</div>}
       <button type="button" disabled={busy} onClick={() => void submit()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 font-kufi font-black text-[#061011] disabled:opacity-60">{busy && <Loader2 className="h-4 w-4 animate-spin" />}{mode === 'register' ? 'إنشاء الحساب' : 'تسجيل الدخول'}</button>
       <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400">
