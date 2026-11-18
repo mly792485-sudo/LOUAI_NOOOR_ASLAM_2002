@@ -410,9 +410,9 @@ const getHijriDate = (date: Date) => {
   }
 };
 
-const prayerCacheKey = (country: string, city: string, date: Date, method: string, methodId: number, coordinates?: { latitude: number; longitude: number }) => {
+const prayerCacheKey = (country: string, city: string, date: Date, method: string, methodId: number, coordinates?: { latitude: number; longitude: number }, highLatitudeRule = 'none') => {
   const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
-  return `noor-prayer-times-v5:${country}:${city}:${formatApiDate(date)}:${deviceTimeZone}:${method}:${methodId}:${coordinates ? `${coordinates.latitude.toFixed(3)},${coordinates.longitude.toFixed(3)}` : 'city'}`;
+  return `noor-prayer-times-v6:${country}:${city}:${formatApiDate(date)}:${deviceTimeZone}:${method}:${methodId}:${highLatitudeRule}:${coordinates ? `${coordinates.latitude.toFixed(3)},${coordinates.longitude.toFixed(3)}` : 'city'}`;
 };
 
 const readCachedPrayerTimes = (key: string) => {
@@ -436,11 +436,12 @@ const writeCachedPrayerTimes = (key: string, value: unknown) => {
 export async function getAccuratePrayerTimes(
   countryName: string = 'مملكة البحرين',
   cityName: string = 'المنامة',
-  method: string = 'BahrainOfficial',
+  method: string = 'Auto',
   date: Date = new Date(),
   coordinates?: { latitude: number; longitude: number },
   madhhab: 'standard' | 'hanafi' = 'standard',
   offsets: Partial<Record<'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha', number>> = {},
+  highLatitudeRule: 'none' | 'angleBased' | 'oneSeventh' | 'middleOfTheNight' = 'none',
 ) {
   const { country, city } = findCountryAndCity(countryName, cityName);
   const requestedCountry = countryName?.trim().toLocaleLowerCase();
@@ -451,17 +452,19 @@ export async function getAccuratePrayerTimes(
   });
   const effectiveCountryCode = knownCountry ? country.code : 'GLOBAL';
 
-  // BahrainOfficial is a Bahrain-only profile. If the user is elsewhere and
-  // has not selected a custom method, use that country's regional default.
-  const methodId = method === 'BahrainOfficial'
+  // Auto selects the configured regional default. Every other method is
+  // explicit and must never be silently replaced when the user travels.
+  const methodId = method === 'Auto'
     ? (COUNTRY_DEFAULT_METHODS[effectiveCountryCode] || METHOD_IDS.MWL)
     : (METHOD_IDS[method] || METHOD_IDS.MWL);
-  const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`, methodId, coordinates);
+  const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`, methodId, coordinates, highLatitudeRule);
   try {
     const datePath = formatApiDate(date);
+    const latitudeAdjustmentMethod = highLatitudeRule === 'angleBased' ? 1 : highLatitudeRule === 'middleOfTheNight' ? 2 : highLatitudeRule === 'oneSeventh' ? 3 : 0;
+    const adjustmentQuery = latitudeAdjustmentMethod ? `&latitudeAdjustmentMethod=${latitudeAdjustmentMethod}` : '';
     const endpoint = coordinates
-      ? `https://api.aladhan.com/v1/timings/${datePath}?latitude=${encodeURIComponent(coordinates.latitude)}&longitude=${encodeURIComponent(coordinates.longitude)}&method=${methodId}&school=${madhhab === 'hanafi' ? 1 : 0}`
-      : `https://api.aladhan.com/v1/timingsByCity/${datePath}?city=${encodeURIComponent(city.en)}&country=${encodeURIComponent(country.en)}&method=${methodId}&school=${madhhab === 'hanafi' ? 1 : 0}`;
+      ? `https://api.aladhan.com/v1/timings/${datePath}?latitude=${encodeURIComponent(coordinates.latitude)}&longitude=${encodeURIComponent(coordinates.longitude)}&method=${methodId}&school=${madhhab === 'hanafi' ? 1 : 0}${adjustmentQuery}`
+      : `https://api.aladhan.com/v1/timingsByCity/${datePath}?city=${encodeURIComponent(city.en)}&country=${encodeURIComponent(country.en)}&method=${methodId}&school=${madhhab === 'hanafi' ? 1 : 0}${adjustmentQuery}`;
     const controller = new AbortController();
     const timeout = globalThis.setTimeout(() => controller.abort(), 8000);
     const res = await fetch(endpoint, { signal: controller.signal });

@@ -8,8 +8,9 @@ export type AppLanguage = 'ar' | 'en' | 'id' | 'fr' | 'ru' | 'fa' | 'tr' | 'es' 
 export interface AppSettings {
   theme: 'light' | 'dark';
   language?: AppLanguage;
-  calculationMethod: 'BahrainOfficial' | 'UmmAlQura' | 'MWL' | 'ISNA' | 'Egypt' | 'GulfRegion' | 'Karachi' | 'Diyanet';
+  calculationMethod: 'Auto' | 'BahrainOfficial' | 'UmmAlQura' | 'MWL' | 'ISNA' | 'Egypt' | 'GulfRegion' | 'Karachi' | 'Diyanet';
   madhhab?: 'standard' | 'hanafi';
+  highLatitudeRule?: 'none' | 'angleBased' | 'oneSeventh' | 'middleOfTheNight';
   prayerOffsets?: Partial<Record<'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha', number>>;
   latitude: number | null;
   longitude: number | null;

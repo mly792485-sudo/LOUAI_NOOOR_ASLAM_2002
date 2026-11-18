@@ -81,7 +81,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
       const todayDate = new Date();
       let res;
       try {
-        res = await getAccuratePrayerTimes(selectedCountry, selectedCity, settings.calculationMethod, todayDate, coordinates, settings.madhhab || 'standard', settings.prayerOffsets || {});
+        res = await getAccuratePrayerTimes(selectedCountry, selectedCity, settings.calculationMethod, todayDate, coordinates, settings.madhhab || 'standard', settings.prayerOffsets || {}, settings.highLatitudeRule || 'none');
       } catch (error) {
         if (isMounted) {
           setLoadError(error instanceof Error ? error.message : 'تعذر تحميل مواقيت الصلاة');
@@ -188,7 +188,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
         date.setHours(12, 0, 0, 0);
         date.setDate(date.getDate() + index);
         try {
-          const day = await getAccuratePrayerTimes(selectedCountry, selectedCity, settings.calculationMethod, date, coordinates, settings.madhhab || 'standard', settings.prayerOffsets || {});
+          const day = await getAccuratePrayerTimes(selectedCountry, selectedCity, settings.calculationMethod, date, coordinates, settings.madhhab || 'standard', settings.prayerOffsets || {}, settings.highLatitudeRule || 'none');
           return { date, times: day.times };
         } catch {
           return null;
@@ -202,7 +202,7 @@ export default function PrayerTimesSection({ settings, onUpdateSettings, onTrigg
     return () => {
       isMounted = false;
     };
-  }, [selectedCountry, selectedCity, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.latitude, settings.longitude, currentTime.toDateString()]);
+  }, [selectedCountry, selectedCity, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.highLatitudeRule, settings.latitude, settings.longitude, currentTime.toDateString()]);
 
   // Keep the visible countdown moving every second without reloading prayer data.
   useEffect(() => {

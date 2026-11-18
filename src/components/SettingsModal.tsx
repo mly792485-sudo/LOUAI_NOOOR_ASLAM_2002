@@ -420,7 +420,8 @@ export default function SettingsModal({
                 onChange={changeMethod}
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-[#080E10] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                <option value="BahrainOfficial">{isEn ? "Bahrain local reference (Riffa-compatible)" : "الضبط البحريني المرجعي (مطابق للرفاع)"}</option>
+                <option value="Auto">{isEn ? "Automatic regional method" : "تلقائي حسب الدولة والمنطقة"}</option>
+                <option value="BahrainOfficial">{isEn ? "Bahrain calculation profile (API method 4)" : "طريقة حساب البحرين (معرّف API 4)"}</option>
                 <option value="GulfRegion">{isEn ? "Gulf Region (GCC)" : "منطقة الخليج العربي (دول الخليج)"}</option>
                 <option value="UmmAlQura">{isEn ? "Umm Al-Qura (Makkah)" : "جامعة أم القرى (مكة المكرمة)"}</option>
                 <option value="MWL">{isEn ? "Muslim World League" : "رابطة العالم الإسلامي"}</option>
@@ -450,6 +451,18 @@ export default function SettingsModal({
                   ))}
                 </div>
               </div>
+            </div>
+            <div className="flex flex-col gap-1.5 p-3.5 bg-white dark:bg-[#0B1516] rounded-2xl border border-[#EBE7DF] dark:border-[#132326]">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                {isEn ? 'High-latitude adjustment:' : 'معالجة المناطق ذات خطوط العرض العالية:'}
+              </label>
+              <select value={settings.highLatitudeRule || 'none'} onChange={(e) => onUpdateSettings({ ...settings, highLatitudeRule: e.target.value as AppSettings['highLatitudeRule'] })} className="w-full px-3 py-2 bg-slate-50 dark:bg-[#080E10] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium">
+                <option value="none">{isEn ? 'None (normal solar signs)' : 'بدون معالجة (العلامات الشمسية الطبيعية)'}</option>
+                <option value="angleBased">{isEn ? 'Angle-based' : 'حسب الزاوية'}</option>
+                <option value="oneSeventh">{isEn ? 'One seventh of the night' : 'سُبع الليل'}</option>
+                <option value="middleOfTheNight">{isEn ? 'Middle of the night' : 'منتصف الليل'}</option>
+              </select>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? 'Used by the calculation service when dawn or night signs are unusual.' : 'يُرسل هذا الاختيار لمحرك الحساب عند عدم ظهور الفجر أو العشاء بشكل طبيعي.'}</p>
             </div>
           </div>
 

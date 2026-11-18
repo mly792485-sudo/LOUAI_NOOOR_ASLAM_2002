@@ -221,11 +221,12 @@ export default function App() {
     const stored = safeStorage.getItem('noor_settings');
     const defaults = {
       theme: 'dark',
-      calculationMethod: 'BahrainOfficial',
+      calculationMethod: 'Auto',
       madhhab: 'standard',
       prayerOffsets: {},
       latitude: null,
       longitude: null,
+      highLatitudeRule: 'none',
       country: 'مملكة البحرين',
       city: 'المنامة',
       adhanReminder: true,
@@ -259,9 +260,11 @@ export default function App() {
           modified = true;
         }
         const finalSettings = { ...defaults, ...parsed };
-        // Migrate old Bahrain installs from the generic Gulf profile.
-        if (finalSettings.country === 'مملكة البحرين' && finalSettings.calculationMethod === 'GulfRegion') {
-          finalSettings.calculationMethod = 'BahrainOfficial';
+        // Older builds used BahrainOfficial as an implicit automatic profile.
+        // Migrate that legacy default to the explicit Auto mode so a selected
+        // method is never silently replaced when the user travels.
+        if (finalSettings.calculationMethod === 'BahrainOfficial') {
+          finalSettings.calculationMethod = 'Auto';
           modified = true;
         }
         if (!finalSettings.selectedAdhanVoice) {
@@ -426,6 +429,7 @@ export default function App() {
             : undefined,
           settings.madhhab || 'standard',
           settings.prayerOffsets || {},
+          settings.highLatitudeRule || 'none',
         );
         if (dayOffset === 0) setLivePrayerTimes(res.times);
         scheduleDays.push({
@@ -445,7 +449,7 @@ export default function App() {
 
     loadAndSchedule().catch((error) => console.warn('تعذر جدولة الإشعارات المحلية:', error));
     return () => { cancelled = true; };
-  }, [settings.country, settings.city, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.latitude, settings.longitude, settings.adhanReminder, settings.azkarReminder, settings.morningAzkarReminder, settings.eveningAzkarReminder, settings.prePrayerReminder, settings.prePrayerMinutes, settings.preIqamaMinutes, settings.iqamaReminder, settings.iqamaMinutes, settings.fridayKahfReminder, settings.tahajjudReminder]);
+  }, [settings.country, settings.city, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.highLatitudeRule, settings.latitude, settings.longitude, settings.adhanReminder, settings.azkarReminder, settings.morningAzkarReminder, settings.eveningAzkarReminder, settings.prePrayerReminder, settings.prePrayerMinutes, settings.preIqamaMinutes, settings.iqamaReminder, settings.iqamaMinutes, settings.fridayKahfReminder, settings.tahajjudReminder]);
 
   // Daily Adhan & Prayer Times background checker
   useEffect(() => {
@@ -465,6 +469,7 @@ export default function App() {
             : undefined,
         settings.madhhab || 'standard',
         settings.prayerOffsets || {},
+        settings.highLatitudeRule || 'none',
       );
       const times = res.times;
 
@@ -589,7 +594,7 @@ export default function App() {
     checkPrayerTimes();
     const interval = setInterval(checkPrayerTimes, 30000);
     return () => clearInterval(interval);
-  }, [settings.city, settings.country, settings.calculationMethod, settings.adhanReminder, settings.visualAdhanAlert, settings.soundEnabled, settings.selectedAdhanVoice, settings.prePrayerReminder, settings.prePrayerMinutes, settings.preIqamaMinutes, settings.iqamaReminder, settings.iqamaMinutes, settings.fridayKahfReminder, settings.tahajjudReminder]);
+  }, [settings.city, settings.country, settings.calculationMethod, settings.madhhab, settings.prayerOffsets, settings.highLatitudeRule, settings.adhanReminder, settings.visualAdhanAlert, settings.soundEnabled, settings.selectedAdhanVoice, settings.prePrayerReminder, settings.prePrayerMinutes, settings.preIqamaMinutes, settings.iqamaReminder, settings.iqamaMinutes, settings.fridayKahfReminder, settings.tahajjudReminder]);
 
   // Sync settings and apply dark theme
   useEffect(() => {
@@ -732,19 +737,6 @@ export default function App() {
   // the calendar day has changed. The API is queried again with fresh coords.
   useEffect(() => {
     let cancelled = false;
-    const methodForCountry = (code?: string, previous = settings.calculationMethod): AppSettings['calculationMethod'] => {
-      switch (code?.toUpperCase()) {
-        case 'BH': return 'BahrainOfficial';
-        case 'SA': return 'UmmAlQura';
-        case 'EG': return 'Egypt';
-        case 'AE':
-        case 'QA':
-        case 'KW':
-        case 'OM': return 'GulfRegion';
-        default: return previous === 'BahrainOfficial' ? 'GulfRegion' : previous;
-      }
-    };
-
     const refreshLocation = async (requestPermission: boolean) => {
       try {
         let permission = await Geolocation.checkPermissions();
@@ -782,7 +774,6 @@ export default function App() {
           longitude,
           ...(country ? { country } : {}),
           ...(city ? { city } : { city: 'موقعك الحالي' }),
-          calculationMethod: methodForCountry(countryCode, previous.calculationMethod),
         }));
       } catch (error) {
         console.warn('تعذر الحصول على موقع المستخدم:', error);
