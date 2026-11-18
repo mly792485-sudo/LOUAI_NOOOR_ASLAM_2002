@@ -170,6 +170,53 @@ img {
   background-size: 24px 24px;
 }
 
+/* Focused Islamic onboarding surface: ornamental, calm, and safe on iPhone screens. */
+.noor-onboarding {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(52, 211, 153, 0.13), transparent 32%),
+    linear-gradient(135deg, #061211 0%, #0a1d1b 52%, #04100f 100%);
+  isolation: isolate;
+}
+
+.noor-onboarding::before,
+.noor-onboarding::after {
+  position: fixed;
+  z-index: -1;
+  width: 34rem;
+  height: 34rem;
+  border: 1px solid rgba(110, 231, 183, 0.1);
+  border-radius: 42% 58% 53% 47%;
+  content: "";
+  pointer-events: none;
+  transform: rotate(24deg);
+  box-shadow: 0 0 0 18px rgba(212, 175, 55, 0.025), 0 0 0 36px rgba(110, 231, 183, 0.025);
+}
+
+.noor-onboarding::before { top: -18rem; left: -18rem; }
+.noor-onboarding::after { right: -18rem; bottom: -18rem; transform: rotate(-32deg); }
+
+.noor-onboarding__ornament {
+  position: fixed;
+  z-index: -1;
+  width: 15rem;
+  height: 28rem;
+  opacity: 0.18;
+  pointer-events: none;
+  background-image:
+    linear-gradient(45deg, transparent 42%, rgba(110, 231, 183, 0.28) 43%, transparent 45%),
+    linear-gradient(-45deg, transparent 42%, rgba(212, 175, 55, 0.2) 43%, transparent 45%);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+}
+
+.noor-onboarding__ornament--left { top: 8%; left: -5rem; transform: rotate(10deg); }
+.noor-onboarding__ornament--right { right: -5rem; bottom: 4%; transform: rotate(-10deg); }
+
+@media (max-width: 420px) {
+  .noor-onboarding { padding-inline: 0.5rem; }
+  .noor-onboarding__ornament { opacity: 0.11; }
+}
+
 .glow-gold {
   text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
 }
