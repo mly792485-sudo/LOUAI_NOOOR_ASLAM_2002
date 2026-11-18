@@ -491,7 +491,7 @@ export default function SettingsModal({
 
                 <span className="flex items-center gap-1 px-2.5 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded-full shadow-xs">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>{isEn ? "Native ✓" : "مفعل ✓"}</span>
+                  <span>{isEn ? "Enabled ✓" : "مفعل ✓"}</span>
                 </span>
               </div>
 
@@ -616,10 +616,10 @@ export default function SettingsModal({
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{isEn ? "Prayer Times Adhan Reminder" : "تنبيه وقت الأذان الفعلي"}</p>
                     <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                      {isEn ? "Native" : "مشغل بالنظام (Native)"}
+                      {isEn ? "System alert" : "تنبيه النظام"}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? "Offline audio notification at the exact prayer time" : "إشعار صوتي محلي عند دخول وقت الأذان"}</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? "Audio alert at the exact prayer time" : "إشعار صوتي عند دخول وقت الأذان"}</p>
                 </div>
               </div>
               <button
@@ -642,7 +642,7 @@ export default function SettingsModal({
                     </h6>
                   </div>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    {isEn ? "Offline / Native" : "يعمل دون إنترنت"}
+                    {isEn ? "Included recording" : "تسجيل مرفق"}
                   </span>
                 </div>
 
@@ -771,7 +771,7 @@ export default function SettingsModal({
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{isEn ? "Visual Adhan Alert & Du'a" : "تنبيه الأذان المرئي والدعاء"}</p>
                     <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                      {isEn ? "Native" : "مشغل بالنظام (Native)"}
+                      {isEn ? "System alert" : "تنبيه النظام"}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? "Short spiritual tips & supplication on adhan" : "عرض نصائح دينية قصيرة وأدعية مباركة عند كل أذان"}</p>
@@ -840,7 +840,7 @@ export default function SettingsModal({
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{isEn ? "Daily Adhkar Reminders" : "تنبيهات الأذكار اليومية"}</p>
                     <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                      {isEn ? "Native" : "مفعل بالنظام (Native)"}
+                      {isEn ? "Enabled" : "مفعل"}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">{isEn ? "Reminders for morning & evening supplications" : "تذكير بقراءة أذكار الصباح والمساء والأدعية"}</p>

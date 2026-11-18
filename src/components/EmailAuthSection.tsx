@@ -88,8 +88,8 @@ export default function EmailAuthSection({ onSuccess, onGuest }: Props) {
   return (
     <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-right">
       <div className="mb-4 flex items-center gap-3">
-        <div className="rounded-xl bg-emerald-500/15 p-3 text-emerald-300"><Mail className="h-5 w-5" /></div>
-        <div><h2 className="font-kufi font-black text-white">حساب البريد الإلكتروني</h2><p className="text-xs text-slate-400">حساب حقيقي لحفظ إعداداتك ومزامنتها</p></div>
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/25"><Mail className="h-5 w-5" /></div>
+        <div><h2 className="font-kufi font-black text-white">حساب البريد الإلكتروني</h2><p className="text-xs text-slate-400">تسجيل دخول آمن عبر Firebase</p></div>
       </div>
       {mode === 'register' && <input value={name} onChange={(event) => setName(event.target.value)} placeholder="الاسم" autoComplete="name" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none focus:border-emerald-400" />}
       <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="البريد الإلكتروني" type="email" autoComplete="email" dir="ltr" className="mb-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none focus:border-emerald-400" />

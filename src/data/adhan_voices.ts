@@ -19,8 +19,8 @@ export const BUNDLED_ADHAN_FILE = 'adhan.wav';
 export const ADHAN_VOICES_LIST: AdhanVoiceOption[] = [
   {
     id: BUNDLED_ADHAN_ID,
-    nameAr: 'أذان الحرم المكي — الشيخ علي ملا (دون إنترنت)',
-    nameEn: 'Makkah Adhan — Sheikh Ali Mulla (Offline)',
+    nameAr: 'أذان الحرم المكي — الشيخ علي ملا',
+    nameEn: 'Makkah Adhan — Sheikh Ali Mulla',
     muezzin: 'الشيخ علي أحمد ملا — أذان مكة المكرمة',
     description: 'تسجيل أذان منسوب للشيخ علي أحمد ملا، منشور في Internet Archive ضمن Public Domain. يستخدم للتشغيل الكامل والإشعارات القصيرة.',
     audioUrls: [],

@@ -19,8 +19,8 @@ export const isIOSPlatform = (): boolean => {
 export const ADHAN_VOICES = [
   {
     id: "makkah-ali-mulla",
-    nameAr: "أذان الحرم المكي — الشيخ علي ملا (دون إنترنت)",
-    nameEn: "Makkah Adhan — Sheikh Ali Mulla (Offline)",
+    nameAr: "أذان الحرم المكي — الشيخ علي ملا",
+    nameEn: "Makkah Adhan — Sheikh Ali Mulla",
     file: "adhan_notification.wav",
   },
 ];
@@ -252,74 +252,12 @@ export const scheduleAllNativeNotifications = async (
       ADHAN_VOICES[0];
     const adhanSoundFile = selectedVoiceObj.file;
 
-    const getPrePrayerNotification = (prayerName: string, minutes: number) => {
-      switch (prayerName) {
-        case "Fajr":
-          return {
-            title: "الفجر بعد قليل 🕌",
-            body: "توفيق يومك يبدأ الآن. اقطع انشغالك وتأهب لنداء الفلاح والوضوء. 🌿 اضغط لفتح التطبيق.",
-          };
-        case "Maghrib":
-          return {
-            title: "المغرب بعد قليل 🕌",
-            body: "دقائق وتُفتح أبواب السماء للداعين.. توضأ واستعد. 👈 انقر لتعرف أوقات استجابة الدعاء.",
-          };
-        case "Isha":
-          return {
-            title: "العشاء بعد قليل 🕌",
-            body: "من انتظر الصلاة فهو في صلاة. اغتنم الدقائق وتوضأ لتنال الأجر والبشائر النبوية.",
-          };
-        case "Dhuhr":
-          return {
-            title: "الظهر بعد قليل 🕌",
-            body: "تفتح أبواب السماء عند زوال الشمس.. استعد بالوضوء وأرح قلبك بالصلاة. 🌿",
-          };
-        case "Asr":
-          return {
-            title: "العصر بعد قليل 🕌",
-            body: "الصلاة الوسطى.. حافظ عليها واغتنم عظيم أجرها ونورها في صحيفتك. 🌿",
-          };
-        default:
-          return {
-            title: `اقترب موعد الأذان (${minutes} د) 🕌`,
-            body: `استعد للوضوء وإجابة نداء الصلاة في وقتها.`,
-          };
-      }
-    };
-
     const getAdhanNotification = (prayerName: string, arabicName: string) => {
-      switch (prayerName) {
-        case "Fajr":
-          return {
-            title: `حان الآن موعد أذان الفجر 🕌 (${selectedVoiceObj.nameAr.split("(")[1]?.replace(")", "") || "الحرم"})`,
-            body: "قال ﷺ: «من تطهر فى بيته ثم مشى إلى بيت من بيوت الله، ليقضى فريضة من فرائض الله، كانت خطوتاه إحداهما تحط خطيئة، والأخرى ترفع درجة».",
-          };
-        case "Maghrib":
-          return {
-            title: `حان الآن موعد أذان المغرب 🕌 (${selectedVoiceObj.nameAr.split("(")[1]?.replace(")", "") || "الحرم"})`,
-            body: "قال ﷺ: «من تطهر فى بيته ثم مشى إلى بيت من بيوت الله، ليقضى فريضة من فرائض الله، كانت خطوتاه إحداهما تحط خطيئة، والأخرى ترفع درجة».",
-          };
-        case "Isha":
-          return {
-            title: "حان الآن موعد أذان العشاء 🕌",
-            body: "سُئل ﷺ: أيّ الأعمال أحبّ إلى الله؟ قال: «الصّلاة على وقتها» متفق عليه.",
-          };
-        case "Dhuhr":
-          return {
-            title: "حان الآن موعد أذان الظهر 🕌",
-            body: "قال ﷺ: «إذا نودي بالصلاة فُتحت أبواب السماء واستُجيب الدعاء».",
-          };
-        case "Asr":
-          return {
-            title: "حان الآن موعد أذان العصر 🕌",
-            body: "قال ﷺ: «من صلى البردين دخل الجنة» (البردان: الفجر والعصر).",
-          };
-        default:
-          return {
-            title: `حان الآن موعد أذان صلاة ${arabicName} 🕌`,
-            body: `حيّ على الصلاة، حيّ على الفلاح.. تقبل الله طاعتكم.`,
-          };
-      }
+      void prayerName;
+      return {
+        title: `حان الآن موعد أذان ${arabicName} 🕌`,
+        body: `حان وقت صلاة ${arabicName}. تقبل الله طاعتكم.`,
+      };
     };
 
     // Schedule for the next 7 days in advance
