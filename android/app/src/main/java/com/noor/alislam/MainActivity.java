@@ -37,7 +37,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         if (audioManager != null && audioFocusRequest != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             audioManager.abandonAudioFocusRequest(audioFocusRequest);
         }
