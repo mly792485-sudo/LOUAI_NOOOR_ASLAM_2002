@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "description": "كتالوج أصوات الأذكار؛ لا يوجد fallback بين الأقسام أو الأذكار.",
+  "categories": {
+    "morning": {
+      "alafasy": { "url": "/audio/adhkar_morning.mp3", "kind": "category", "verified": true }
+    },
+    "evening": {
+      "alafasy": { "url": "/audio/adhkar_evening.mp3", "kind": "category", "verified": true }
+    },
+    "sleep": {
+      "alafasy": { "url": "/audio/adhkar_sleep.mp3", "kind": "category", "verified": true }
+    },
+    "tahajjud": {
+      "alafasy": { "url": "/audio/adhkar_witr.mp3", "kind": "category", "verified": true }
+    }
+  },
+  "items": {}
+}

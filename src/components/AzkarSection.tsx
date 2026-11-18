@@ -47,6 +47,7 @@ import {
 import { azkarData } from '../data/azkar';
 import { ZekrItem } from '../types';
 import { safeStorage } from '../utils/safeStorage';
+import { adhkarAudioManager } from '../utils/adhkarAudioManager';
 
 export interface AzkarReciter {
   id: string;
@@ -323,19 +324,20 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
       audioRef.current = null;
     }
 
-    const categoryUrls = CATEGORY_AUDIO_MAP[selectedCatId];
-    const audioUrl = categoryUrls?.[selectedReciterId];
-    if (!audioUrl) {
-      setAudioError('الصوت غير متوفر حاليًا لهذا القسم والقارئ، وسيتم إضافته قريبًا بإذن الله.');
-      setActivePlayingId(null);
-      setIsLoadingAudio(false);
-      return;
-    }
-    const audioUrls = [audioUrl];
+    const audioUrls: string[] = [];
     setIsLoadingAudio(true);
     setActivePlayingId('category');
     setAudioError(null);
     void (async () => {
+      const audioUrl = await adhkarAudioManager.resolveCategoryUrl(selectedCatId, selectedReciterId);
+      if (!audioUrl) {
+        setIsLoadingAudio(false);
+        setIsPlaying(false);
+        setActivePlayingId(null);
+        setAudioError('الصوت غير متوفر حاليًا لهذا القسم والقارئ، وسيتم إضافته قريبًا بإذن الله.');
+        return;
+      }
+      audioUrls.push(audioUrl);
       for (const audioUrl of audioUrls) {
         try {
           const audio = new Audio(audioUrl);
