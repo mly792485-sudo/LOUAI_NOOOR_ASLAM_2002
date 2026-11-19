@@ -855,8 +855,10 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
           
           {/* Previous Category Button */}
           <button
+            type="button"
             onClick={handlePrevCategory}
-            className="flex items-center gap-1 px-3 py-1.5 bg-[#091B1F] hover:bg-emerald-950 text-slate-300 hover:text-emerald-300 border border-emerald-500/20 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            aria-label={isEn ? 'Previous category' : 'القسم السابق'}
+            className="relative z-20 flex min-w-11 min-h-11 touch-manipulation pointer-events-auto items-center justify-center gap-1 px-3 py-1.5 bg-[#091B1F] hover:bg-emerald-950 text-slate-300 hover:text-emerald-300 border border-emerald-500/20 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
             title={isEn ? 'Previous category' : 'القسم السابق'}
           >
             <ChevronRight className="w-4 h-4" />
@@ -885,8 +887,10 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
 
           {/* Next Category Button */}
           <button
+            type="button"
             onClick={handleNextCategory}
-            className="flex items-center gap-1 px-3 py-1.5 bg-[#091B1F] hover:bg-emerald-950 text-slate-300 hover:text-emerald-300 border border-emerald-500/20 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            aria-label={isEn ? 'Next category' : 'القسم التالي'}
+            className="relative z-20 flex min-w-11 min-h-11 touch-manipulation pointer-events-auto items-center justify-center gap-1 px-3 py-1.5 bg-[#091B1F] hover:bg-emerald-950 text-slate-300 hover:text-emerald-300 border border-emerald-500/20 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
             title={isEn ? 'Next category' : 'القسم التالي'}
           >
             <span className="hidden sm:inline">{isEn ? 'Next' : 'التالي'}</span>

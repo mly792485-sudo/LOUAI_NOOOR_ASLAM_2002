@@ -36,6 +36,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
   });
   const [inputText, setInputText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [lastFailedQuestion, setLastFailedQuestion] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,6 +77,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
 
     setMessages(prev => [...prev, newUserMsg, initialAssistantMsg]);
     setInputText('');
+    setLastFailedQuestion(null);
     setIsLoading(true);
 
     const controller = new AbortController();
@@ -107,6 +109,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
           const fallbackText = fallbackPayload.text?.trim() || '';
           if (fallbackText) {
             setMessages(prev => prev.map(msg => msg.id === assistantMsgId ? { ...msg, text: fallbackText } : msg));
+            setLastFailedQuestion(null);
             return;
           }
         }
@@ -177,6 +180,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
           )
         );
       }
+      setLastFailedQuestion(null);
     } catch (e) {
       const rawError = e instanceof Error ? e.message : '';
       const errorMessage = rawError === 'ASSISTANT_SERVICE_UNAVAILABLE'
@@ -198,6 +202,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
             : msg
         )
       );
+      setLastFailedQuestion(normalizedQuestion);
     } finally {
       window.clearTimeout(timeoutId);
       setIsLoading(false);
@@ -288,6 +293,16 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
         )}
         <div ref={scrollRef} />
       </div>
+
+      {lastFailedQuestion && !isLoading && (
+        <button
+          type="button"
+          onClick={() => void handleSendMessage(lastFailedQuestion)}
+          className="self-end rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-700 transition-colors hover:bg-amber-500/20 dark:text-amber-300"
+        >
+          {isEn ? 'Retry the last question' : 'إعادة إرسال السؤال الأخير'}
+        </button>
+      )}
 
       {/* Preset click suggestions */}
       <div className="space-y-1.5">

@@ -34,6 +34,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { AppSettings } from '../types';
 import { safeStorage } from '../utils/safeStorage';
+import { openEhsan } from '../services/externalLinks';
 
 interface EhsanIslamicPlatformProps {
   settings: AppSettings;
@@ -145,6 +146,16 @@ export default function EhsanIslamicPlatformSection({ settings, isEn = false }: 
 
   // In-App Browser Modal State for Ehsan
   const [isInAppBrowserOpen, setIsInAppBrowserOpen] = useState(false);
+  const [ehsanOpenError, setEhsanOpenError] = useState(false);
+
+  const handleOpenEhsan = async () => {
+    setEhsanOpenError(false);
+    try {
+      await openEhsan();
+    } catch {
+      setEhsanOpenError(true);
+    }
+  };
 
   useEffect(() => {
     if (!isInAppBrowserOpen) return;
@@ -430,7 +441,7 @@ export default function EhsanIslamicPlatformSection({ settings, isEn = false }: 
                 {/* 1. Direct Safe In-App Browser / Open */}
                 <button
                   id="open-ehsan-inapp-btn"
-                  onClick={() => setIsInAppBrowserOpen(true)}
+                  onClick={() => void handleOpenEhsan()}
                   className="w-full py-3.5 px-6 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 group"
                 >
                   <span>{isEn ? "Open Ehsan Platform" : "فتح منصة إحسان الآن"}</span>
@@ -471,6 +482,12 @@ export default function EhsanIslamicPlatformSection({ settings, isEn = false }: 
           </div>
 
           {/* Quick Categories Bento Grid */}
+          {ehsanOpenError && (
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-rose-400/30 bg-rose-950/30 px-4 py-3 text-xs text-rose-200" role="alert">
+              <span>تعذر فتح منصة إحسان. تحقق من اتصال الإنترنت وحاول مرة أخرى.</span>
+              <button type="button" onClick={() => void handleOpenEhsan()} className="shrink-0 rounded-lg bg-rose-500/20 px-3 py-1.5 font-bold hover:bg-rose-500/30">إعادة المحاولة</button>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {EHSAN_CATEGORIES.map((item) => {
               const Icon = item.icon;
@@ -478,7 +495,7 @@ export default function EhsanIslamicPlatformSection({ settings, isEn = false }: 
                 <div
                   key={item.id}
                   id={`ehsan-card-${item.id}`}
-                  onClick={() => setIsInAppBrowserOpen(true)}
+                  onClick={() => void handleOpenEhsan()}
                   className={`p-4 rounded-2xl bg-gradient-to-br ${item.color} border transition-all duration-200 hover:scale-[1.02] hover:shadow-md flex flex-col justify-between space-y-3 cursor-pointer group`}
                 >
                   <div className="flex items-center justify-between">
