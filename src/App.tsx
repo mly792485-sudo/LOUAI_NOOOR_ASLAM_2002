@@ -70,6 +70,7 @@ import IslamicCalendarSection from './components/IslamicCalendarSection';
 import ZakatCalculatorSection from './components/ZakatCalculatorSection';
 import OriginalOnboardingWizard from './components/OriginalOnboardingWizard';
 import AccountModal from './components/AccountModal';
+import { getAppDistributionUrl } from './services/appDistribution';
 import { ISLAMIC_AVATARS } from './assets/avatars';
 import { requestAllPermissions, scheduleAllNativeNotifications, checkPermissionsStatus, NativePrayerScheduleDay } from './utils/nativeNotifications';
 import { playAdhanAudio, stopAdhanAudio, playPrePrayerChime } from './utils/adhanPlayer';
@@ -886,7 +887,7 @@ export default function App() {
   };
 
   const handleShareApp = async () => {
-    const shareUrl = window.location.href;
+    const shareUrl = getAppDistributionUrl();
     const shareTitle = settings.appName || (isEn ? 'Noor Al-Islam App' : 'تطبيق نور الإسلام');
     const shareMessage = isEn 
       ? `Noor Al-Islam: Comprehensive Islamic companion (Quran, Adhkar, Prayer Times, Tasbih, Ruqyah)\n${shareUrl}` 
@@ -898,7 +899,7 @@ export default function App() {
         await navigator.share({
           title: shareTitle,
           text: shareMessage,
-          url: shareUrl
+          ...(shareUrl ? { url: shareUrl } : {})
         });
         return;
       } catch (err) {
