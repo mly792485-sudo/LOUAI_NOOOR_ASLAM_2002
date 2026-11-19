@@ -4,6 +4,14 @@ import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import './index.css';
 
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    void navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Offline cache is an enhancement; native app startup must continue.
+    });
+  });
+}
+
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {

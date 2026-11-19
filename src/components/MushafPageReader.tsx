@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, List, Loader2, Minus, Plus, RotateCcw, Search, X } from 'lucide-react';
 import { quranMetadata } from '../data/quran_metadata';
+import { cacheRemoteAsset, fetchJsonWithOfflineCache, getCachedAsset } from '../utils/offlineCache';
 
 type MushafMetadata = { juz_number?: number; hizb_number?: number; chapter_id?: number };
 interface MushafPageReaderProps { isEn?: boolean; onClose: () => void; }
@@ -31,6 +32,7 @@ export default function MushafPageReader({ isEn = false, onClose }: MushafPageRe
   const pendingZoomRef = useRef(1);
   const zoomFrameRef = useRef<number | null>(null);
   const imageUrl = `${IMAGE_BASE}/${String(page).padStart(3, '0')}.png`;
+  const [resolvedImageUrl, setResolvedImageUrl] = useState(imageUrl);
 
   const setZoomSmoothly = (value: number) => {
     const nextZoom = Math.max(1, Math.min(3, value));
@@ -51,12 +53,20 @@ export default function MushafPageReader({ isEn = false, onClose }: MushafPageRe
     let cancelled = false;
     setLoading(true);
     setImageError(false);
-    fetch(`${METADATA_BASE}/${page}?language=ar&words=false&fields=text_uthmani`)
-      .then((response) => response.ok ? response.json() as Promise<{ verses?: MushafMetadata[] }> : Promise.reject(new Error('metadata request failed')))
-      .then((data) => { if (!cancelled) setMetadata(data.verses?.[0] || null); })
+    setResolvedImageUrl(imageUrl);
+    void fetchJsonWithOfflineCache<{ verses?: MushafMetadata[] }>(
+      `${METADATA_BASE}/${page}?language=ar&words=false&fields=text_uthmani`,
+      `mushaf-metadata-${page}`,
+    ).then(({ data }) => { if (!cancelled) setMetadata(data.verses?.[0] || null); })
       .catch(() => { if (!cancelled) setMetadata(null); });
+    void getCachedAsset(imageUrl).then((cachedUrl) => {
+      if (!cancelled && cachedUrl !== imageUrl) setResolvedImageUrl(cachedUrl);
+    }).catch(() => undefined);
+    void cacheRemoteAsset(imageUrl).then((cachedUrl) => {
+      if (!cancelled) setResolvedImageUrl(cachedUrl);
+    }).catch(() => undefined);
     return () => { cancelled = true; };
-  }, [page]);
+  }, [page, imageUrl]);
 
   // Preload adjacent pages so the iPhone-like swipe does not wait on the network.
   useEffect(() => {
@@ -156,7 +166,7 @@ export default function MushafPageReader({ isEn = false, onClose }: MushafPageRe
       <main className="flex-1 min-h-0 overflow-auto p-2 sm:p-4 flex items-start justify-center overscroll-contain" style={{ touchAction: 'pan-y' }}>
         <div key={`${page}-${transitionDirection}`} className={`relative shrink-0 flex justify-center mushaf-page-enter ${transitionDirection === 'previous' ? 'mushaf-page-previous' : ''}`} style={{ width: `${zoom * 100}%`, minWidth: zoom > 1 ? `${zoom * 100}%` : undefined, willChange: 'transform, opacity' }}>
           {loading && <div className="absolute z-10 top-4 left-1/2 -translate-x-1/2 rounded-full bg-emerald-950/90 text-white px-3 py-2"><Loader2 className="w-5 h-5 animate-spin" /></div>}
-          {imageError ? <div className="w-full min-h-[78vh] flex flex-col items-center justify-center gap-3 rounded-lg bg-[#fffdf7] text-slate-900 text-center p-8 shadow-2xl"><p className="font-bold">تعذر تحميل صفحة المصحف الكاملة.</p><button type="button" onClick={() => { setImageError(false); setLoading(true); setRetry((value) => value + 1); }} className="px-4 py-2 rounded-xl bg-emerald-800 text-white">إعادة المحاولة</button></div> : <img key={`${imageUrl}-${retry}`} src={imageUrl} alt={`صفحة المصحف رقم ${page}`} loading="eager" fetchPriority="high" decoding="async" className="block w-full h-auto object-contain rounded-sm shadow-2xl bg-white select-none" draggable={false} onLoad={() => setLoading(false)} onError={() => { setLoading(false); setImageError(true); }} />}
+          {imageError ? <div className="w-full min-h-[78vh] flex flex-col items-center justify-center gap-3 rounded-lg bg-[#fffdf7] text-slate-900 text-center p-8 shadow-2xl"><p className="font-bold">تعذر تحميل صفحة المصحف. افتحها مرة مع الإنترنت لتصبح متاحة دون اتصال.</p><button type="button" onClick={() => { setImageError(false); setLoading(true); setRetry((value) => value + 1); }} className="px-4 py-2 rounded-xl bg-emerald-800 text-white">إعادة المحاولة</button></div> : <img key={`${resolvedImageUrl}-${retry}`} src={resolvedImageUrl} alt={`صفحة المصحف رقم ${page}`} loading="eager" fetchPriority="high" decoding="async" className="block w-full h-auto object-contain rounded-sm shadow-2xl bg-white select-none" draggable={false} onLoad={() => setLoading(false)} onError={() => { setLoading(false); setImageError(true); }} />}
         </div>
       </main>
 

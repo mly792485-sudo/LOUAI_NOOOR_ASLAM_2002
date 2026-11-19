@@ -43,6 +43,7 @@ import { offlineSurahs } from '../data/quran_text';
 import { QURAN_RECITERS, QuranReciter } from '../data/quran_reciters';
 import { SurahMetadata, SurahDetail, Ayah } from '../types';
 import { safeStorage } from '../utils/safeStorage';
+import { fetchJsonWithOfflineCache } from '../utils/offlineCache';
 import MushafPageReader from './MushafPageReader';
 
 const FONT_FAMILIES = [
@@ -157,9 +158,12 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
     setTafsirResult(null);
     setActiveTafsirAyah(null);
 
-    // 1. Check built-in offlineSurahs
-    if (offlineSurahs[surahMeta.number] && offlineSurahs[surahMeta.number].ayahs?.length > 0) {
-      setSelectedSurah(normaliseSurahBasmala(offlineSurahs[surahMeta.number]));
+    // 1. Load the complete verified Uthmani text as an offline code-split
+    // chunk. The older records are merged last for their local summaries.
+    const { fullOfflineSurahs } = await import('../data/quran_text_full');
+    const bundledOfflineSurahs = { ...fullOfflineSurahs, ...offlineSurahs };
+    if (bundledOfflineSurahs[surahMeta.number]?.ayahs?.length > 0) {
+      setSelectedSurah(normaliseSurahBasmala({ ...surahMeta, ...bundledOfflineSurahs[surahMeta.number] }));
       return;
     }
 
@@ -182,8 +186,10 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
     });
 
     try {
-      const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahMeta.number}/quran-uthmani`);
-      const data = await response.json();
+      const { data } = await fetchJsonWithOfflineCache<any>(
+        `https://api.alquran.cloud/v1/surah/${surahMeta.number}/quran-uthmani`,
+        `quran-surah-${surahMeta.number}`,
+      );
       if (data && data.code === 200 && data.data && data.data.ayahs) {
         const loadedAyahs: Ayah[] = data.data.ayahs.map((a: any) => ({
           number: a.numberInSurah,
@@ -250,9 +256,10 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
     setTafsirResult(null);
     try {
       const source = TAFSIR_SOURCES[activeTafsirSource];
-      const res = await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${surahNum}.json`);
-      if (!res.ok) throw new Error('tafsir request failed');
-      const data = await res.json();
+      const { data } = await fetchJsonWithOfflineCache<any[]>(
+        `https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${surahNum}.json`,
+        `tafsir-surah-${source.slug}-${surahNum}`,
+      );
       const entries = Array.isArray(data) ? data : [];
       const text = entries
         .filter((entry: any) => entry?.text)
@@ -272,9 +279,10 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
     setTafsirResult(null);
     try {
       const source = TAFSIR_SOURCES[activeTafsirSource];
-      const res = await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${surahNum}/${ayahNum}.json`);
-      if (!res.ok) throw new Error('tafsir request failed');
-      const data = await res.json();
+      const { data } = await fetchJsonWithOfflineCache<any>(
+        `https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${surahNum}/${ayahNum}.json`,
+        `tafsir-ayah-${source.slug}-${surahNum}-${ayahNum}`,
+      );
       setTafsirResult(`**المصدر:** ${source.reference}\n\n${data?.text || 'لا يتوفر نص التفسير لهذه الآية حاليًا.'}`);
     } catch (e) {
       setTafsirResult('⚠️ تعذر تحميل التفسير الموثق حاليًا.');
@@ -293,9 +301,10 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
 
     try {
       const source = TAFSIR_SOURCES[activeTafsirSource];
-      const res = await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${lookupSurah}/${lookupAyah}.json`);
-      if (!res.ok) throw new Error('tafsir request failed');
-      const data = await res.json();
+      const { data } = await fetchJsonWithOfflineCache<any>(
+        `https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${lookupSurah}/${lookupAyah}.json`,
+        `tafsir-ayah-${source.slug}-${lookupSurah}-${lookupAyah}`,
+      );
       setLookupResult(`**المصدر:** ${source.reference}\n\n${data?.text || 'لا يتوفر نص التفسير لهذه الآية حاليًا.'}`);
     } catch (err) {
       setLookupResult('⚠️ عذراً، تعذر جلب التفسير لهذه الآية حالياً.');
