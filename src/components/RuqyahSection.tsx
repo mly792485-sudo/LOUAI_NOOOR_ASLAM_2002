@@ -412,7 +412,7 @@ export default function RuqyahSection({ isEn = false }: RuqyahSectionProps) {
       </div>
 
       {/* Relaxing Ruqyah Audio Player Card */}
-      <div className="p-4 bg-slate-50/90 dark:bg-slate-950/40 border border-slate-150/40 dark:border-slate-800/80 rounded-2xl space-y-4">
+      <div className="relative z-10 p-4 bg-slate-50/90 dark:bg-slate-950/40 border border-slate-150/40 dark:border-slate-800/80 rounded-2xl space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200/50 dark:border-slate-800/50 pb-3" dir="rtl">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-emerald-100/60 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 rounded-lg">
@@ -516,11 +516,13 @@ export default function RuqyahSection({ isEn = false }: RuqyahSectionProps) {
       </div>
 
       {/* Tabs navigation */}
-      <div className="flex overflow-x-auto gap-2 pb-1.5 scrollbar-none border-b border-slate-100 dark:border-slate-800/40" dir="rtl">
+      <div className="relative z-20 flex w-full overflow-x-auto gap-2 pb-2 scrollbar-none border-b border-slate-100 dark:border-slate-800/40 snap-x" dir="rtl" role="tablist" aria-label="أقسام الرقية الشرعية">
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'quran'}
           onClick={() => setActiveTab('quran')}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+          className={`shrink-0 snap-start px-4 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 min-h-11 ${
             activeTab === 'quran'
               ? 'bg-emerald-600 text-white shadow-md'
               : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300'
@@ -532,8 +534,10 @@ export default function RuqyahSection({ isEn = false }: RuqyahSectionProps) {
 
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'sunnah'}
           onClick={() => setActiveTab('sunnah')}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+          className={`shrink-0 snap-start px-4 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 min-h-11 ${
             activeTab === 'sunnah'
               ? 'bg-emerald-600 text-white shadow-md'
               : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300'
@@ -545,8 +549,10 @@ export default function RuqyahSection({ isEn = false }: RuqyahSectionProps) {
 
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'guidelines'}
           onClick={() => setActiveTab('guidelines')}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+          className={`shrink-0 snap-start px-4 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 min-h-11 ${
             activeTab === 'guidelines'
               ? 'bg-emerald-600 text-white shadow-md'
               : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300'

@@ -146,6 +146,20 @@ export default function EhsanIslamicPlatformSection({ settings, isEn = false }: 
   // In-App Browser Modal State for Ehsan
   const [isInAppBrowserOpen, setIsInAppBrowserOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isInAppBrowserOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsInAppBrowserOpen(false);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isInAppBrowserOpen]);
+
   // Audio Player State for "Two Minutes for Your Akhirah"
   const [selectedAudioIdx, setSelectedAudioIdx] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -691,10 +705,10 @@ export default function EhsanIslamicPlatformSection({ settings, isEn = false }: 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-4xl h-[88vh] bg-white dark:bg-[#0B1516] rounded-3xl shadow-2xl border-2 border-emerald-500/40 flex flex-col overflow-hidden"
+              className="w-full max-w-4xl h-[88dvh] bg-white dark:bg-[#0B1516] rounded-3xl shadow-2xl border-2 border-emerald-500/40 flex flex-col overflow-hidden"
             >
               {/* Modal Top Bar */}
-              <div className="p-3.5 sm:p-4 bg-gradient-to-r from-emerald-900 to-teal-900 text-white flex items-center justify-between border-b border-emerald-700/50">
+              <div className="sticky top-0 z-30 shrink-0 p-3.5 sm:p-4 bg-gradient-to-r from-emerald-900 to-teal-900 text-white flex items-center justify-between border-b border-emerald-700/50">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-amber-400 text-slate-950 rounded-xl font-black">
                     <HeartHandshake className="w-5 h-5" />

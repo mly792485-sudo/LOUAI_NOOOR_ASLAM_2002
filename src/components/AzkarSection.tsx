@@ -1018,9 +1018,9 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
             const isThisPlaying = activePlayingId === item.id && isPlaying;
 
             return (
-              <div
-                key={item.id}
-                id={`zekr-card-${index}`}
+                <div
+                  key={item.id}
+                  id={`zekr-card-${index}`}
                 className={`bg-[#061214] border rounded-3xl p-5 sm:p-6 transition-all duration-200 shadow-xl relative overflow-hidden ${
                   isCompleted 
                     ? 'border-emerald-400/60 bg-emerald-950/15 shadow-[0_0_30px_rgba(16,185,129,0.15)]' 
@@ -1037,14 +1037,19 @@ export default function AzkarSection({ soundEnabled, isEn = false }: AzkarSectio
                   </div>
                 )}
 
-                {/* Zekr Text */}
+                {/* Zekr Text and repeat badge stay in separate layout columns. */}
                 <div 
                   onClick={() => incrementCount(item, index, currentItems.length)}
-                  className="cursor-pointer select-none space-y-3"
+                  className="cursor-pointer select-none space-y-3 min-w-0"
                 >
-                  <p className={`font-serif pt-2 select-text text-slate-100 ${getTextSizeClass()}`}>
-                    {item.text}
-                  </p>
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <span className="mt-2 shrink-0 inline-flex min-w-[3rem] h-10 items-center justify-center rounded-full border border-emerald-400/35 bg-emerald-950/80 px-2 text-center text-xs font-black font-mono text-emerald-300" aria-label={`عدد التكرار ${item.count}`}>
+                      {item.count}×
+                    </span>
+                    <p className={`min-w-0 flex-1 font-serif pt-2 select-text text-slate-100 ${getTextSizeClass()}`}>
+                      {item.text}
+                    </p>
+                  </div>
 
                   {/* Reward Benefit */}
                   {item.reward && (

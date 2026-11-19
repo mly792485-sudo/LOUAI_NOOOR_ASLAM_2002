@@ -124,6 +124,19 @@ export default function VerseOfTheDay({ settings }: VerseOfTheDayProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleShareText = async () => {
+    const shareText = `« ${activeVerse.text} »\n${activeVerse.surah} • ${activeVerse.ref}\n\nتمت المشاركة من تطبيق: ${settings.appName || 'نور الإسلام'}`;
+    try {
+      await Share.share({
+        title: 'آية اليوم',
+        text: shareText,
+        dialogTitle: 'مشاركة الآية',
+      });
+    } catch {
+      await handleCopyText();
+    }
+  };
+
   // Generate the card and share it; do not trigger a browser download.
   const shareCardImage = async () => {
     const canvas = canvasRef.current;
@@ -407,7 +420,7 @@ export default function VerseOfTheDay({ settings }: VerseOfTheDayProps) {
             >
               
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 bg-[#FAF8F5] dark:bg-[#060B0C]">
+              <div className="sticky top-0 z-30 flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 bg-[#FAF8F5] dark:bg-[#060B0C]">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
                     <Share2 className="w-4 h-4" />
@@ -513,7 +526,7 @@ export default function VerseOfTheDay({ settings }: VerseOfTheDayProps) {
               </div>
 
               {/* Modal Footer (Action row) */}
-              <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-[#FAF8F5] dark:bg-[#060B0C] flex flex-col sm:flex-row items-center gap-3">
+              <div className="sticky bottom-0 z-30 p-4 border-t border-slate-100 dark:border-slate-800 bg-[#FAF8F5] dark:bg-[#060B0C] flex flex-col sm:flex-row items-center gap-3">
                 <button
                   id="download-verse-card-final-btn"
                   onClick={() => void shareCardImage()}
@@ -530,6 +543,14 @@ export default function VerseOfTheDay({ settings }: VerseOfTheDayProps) {
                 >
                   {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                   <span>{copied ? 'تم نسخ النص!' : 'نسخ النص فقط'}</span>
+                </button>
+                <button
+                  id="share-text-from-modal-btn"
+                  onClick={() => void handleShareText()}
+                  className="w-full sm:w-auto px-5 py-3 bg-amber-500 text-slate-950 hover:bg-amber-400 font-extrabold text-xs rounded-xl transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1.5"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>مشاركة النص</span>
                 </button>
               </div>
 
