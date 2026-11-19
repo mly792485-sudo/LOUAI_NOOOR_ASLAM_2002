@@ -31,6 +31,7 @@ import { ADHAN_VOICES, checkPermissionsStatus, isNativePlatform, requestAllPermi
 import { playAdhanAudio, stopAdhanAudio, playPrePrayerChime, isAdhanPlaying } from '../utils/adhanPlayer';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { Shield } from 'lucide-react';
+import OfflineContentManager from './OfflineContentManager';
 // @ts-ignore
 import defaultLogo from '../assets/images/noor-al-islam-logo-square.png';
 // @ts-ignore
@@ -232,6 +233,7 @@ export default function SettingsModal({
 
         {/* Content */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
+          <OfflineContentManager isEn={isEn} />
           
           {/* 1. Dedication and Developer Details */}
           <div className="p-5 bg-gradient-to-br from-emerald-600/10 via-amber-500/5 to-teal-600/10 dark:from-emerald-950/40 dark:to-slate-950/40 border border-emerald-500/20 rounded-3xl space-y-3.5">

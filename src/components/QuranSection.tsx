@@ -44,6 +44,7 @@ import { QURAN_RECITERS, QuranReciter } from '../data/quran_reciters';
 import { SurahMetadata, SurahDetail, Ayah } from '../types';
 import { safeStorage } from '../utils/safeStorage';
 import { fetchJsonWithOfflineCache } from '../utils/offlineCache';
+import { loadTafsirSurah, TAFSIR_SOURCES } from '../services/tafsirOfflineManager';
 import MushafPageReader from './MushafPageReader';
 
 const FONT_FAMILIES = [
@@ -120,19 +121,6 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
   const [tafsirResult, setTafsirResult] = useState<string | null>(null);
   const [activeTafsirAyah, setActiveTafsirAyah] = useState<number | null>(null);
   const [activeTafsirSource, setActiveTafsirSource] = useState<'saadi' | 'ibn-kathir'>('saadi');
-
-  const TAFSIR_SOURCES = {
-    saadi: {
-      label: 'تفسير السعدي',
-      slug: 'ar-tafseer-al-saddi',
-      reference: 'تيسير الكريم الرحمن في تفسير كلام المنان — عبد الرحمن بن ناصر السعدي'
-    },
-    'ibn-kathir': {
-      label: 'تفسير ابن كثير',
-      slug: 'ar-tafsir-ibn-kathir',
-      reference: 'تفسير القرآن العظيم — إسماعيل بن عمر ابن كثير'
-    }
-  } as const;
 
   // Manual specific ayah lookup state
   const [lookupSurah, setLookupSurah] = useState<number>(18);
@@ -256,11 +244,7 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
     setTafsirResult(null);
     try {
       const source = TAFSIR_SOURCES[activeTafsirSource];
-      const { data } = await fetchJsonWithOfflineCache<any[]>(
-        `https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${surahNum}.json`,
-        `tafsir-surah-${source.slug}-${surahNum}`,
-      );
-      const entries = Array.isArray(data) ? data : [];
+      const entries = await loadTafsirSurah(activeTafsirSource, surahNum) as any[];
       const text = entries
         .filter((entry: any) => entry?.text)
         .map((entry: any, index: number) => `### الآية ${entry.ayah || index + 1}\n\n${entry.text}`)
@@ -279,11 +263,9 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
     setTafsirResult(null);
     try {
       const source = TAFSIR_SOURCES[activeTafsirSource];
-      const { data } = await fetchJsonWithOfflineCache<any>(
-        `https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${surahNum}/${ayahNum}.json`,
-        `tafsir-ayah-${source.slug}-${surahNum}-${ayahNum}`,
-      );
-      setTafsirResult(`**المصدر:** ${source.reference}\n\n${data?.text || 'لا يتوفر نص التفسير لهذه الآية حاليًا.'}`);
+      const entries = await loadTafsirSurah(activeTafsirSource, surahNum) as any[];
+      const entry = entries.find((item) => Number(item?.ayah) === ayahNum);
+      setTafsirResult(`**المصدر:** ${source.reference}\n\n${entry?.text || 'لا يتوفر نص التفسير لهذه الآية حاليًا.'}`);
     } catch (e) {
       setTafsirResult('⚠️ تعذر تحميل التفسير الموثق حاليًا.');
     } finally {
@@ -301,11 +283,9 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
 
     try {
       const source = TAFSIR_SOURCES[activeTafsirSource];
-      const { data } = await fetchJsonWithOfflineCache<any>(
-        `https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${source.slug}/${lookupSurah}/${lookupAyah}.json`,
-        `tafsir-ayah-${source.slug}-${lookupSurah}-${lookupAyah}`,
-      );
-      setLookupResult(`**المصدر:** ${source.reference}\n\n${data?.text || 'لا يتوفر نص التفسير لهذه الآية حاليًا.'}`);
+      const entries = await loadTafsirSurah(activeTafsirSource, lookupSurah) as any[];
+      const entry = entries.find((item) => Number(item?.ayah) === lookupAyah);
+      setLookupResult(`**المصدر:** ${source.reference}\n\n${entry?.text || 'لا يتوفر نص التفسير لهذه الآية حاليًا.'}`);
     } catch (err) {
       setLookupResult('⚠️ عذراً، تعذر جلب التفسير لهذه الآية حالياً.');
     } finally {
