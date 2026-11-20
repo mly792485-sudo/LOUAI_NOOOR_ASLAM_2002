@@ -56,11 +56,12 @@ const FONT_FAMILIES = [
 ];
 
 // Some offline/API payloads include the basmala in the first ayah while the
-// reader also renders it as the page heading. Strip only that duplicated
-// prefix for surahs other than Al-Fatihah and At-Tawbah.
+// reader also renders it separately. Strip only that duplicated prefix for
+// surahs other than Al-Fatihah and At-Tawbah. The Quran data may use alif
+// wasla (ٱ) or ordinary alif (ا), so both verified forms are accepted here.
 const normaliseSurahBasmala = (surah: SurahDetail): SurahDetail => {
   if (surah.number === 1 || surah.number === 9 || !surah.ayahs?.length) return surah;
-  const basmala = /^بِسْمِ\s+اللَّهِ\s+الرَّحْمَٰنِ\s+الرَّحِيمِ\s*/;
+  const basmala = /^بِسْمِ\s+[ٱا]للَّهِ\s+[ٱا]لرَّحْمَٰنِ\s+[ٱا]لرَّحِيمِ(?:\s+|$)/u;
   const first = surah.ayahs[0];
   if (!basmala.test(first.text)) return surah;
   return {
@@ -838,25 +839,6 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Surah Header / Title Block */}
-          <div className="text-center px-4 py-3 bg-gradient-to-b from-[#0B252A] to-[#040C0E] text-white rounded-2xl space-y-1.5 relative overflow-hidden border border-emerald-500/30 shadow-lg">
-            <span className="px-2.5 py-0.5 bg-emerald-500/20 border border-emerald-400/30 rounded-full text-[10px] font-bold text-emerald-300">
-              السورة رقم {selectedSurah.number} • {selectedSurah.revelationType === 'Meccan' ? '🕋 مكية' : '🕌 مدنية'}
-            </span>
-            <h3 className="text-2xl font-black text-amber-300 mt-1 font-serif">سورة {selectedSurah.name}</h3>
-            <p className="text-[11px] text-emerald-200/80">{selectedSurah.numberOfAyahs} آيات كريمة</p>
-            
-            {/* Quick Tafsir of whole surah button */}
-            <button
-              id="get-surah-tafsir-btn"
-              onClick={() => handleFetchSurahTafsir(selectedSurah.number, selectedSurah.name)}
-              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-[11px] rounded-full shadow-md transition-all cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4 text-slate-950" />
-              <span>طلب تفسير وبيان مقاصد سورة {selectedSurah.name}</span>
-            </button>
           </div>
 
           {/* Audio Player Card */}

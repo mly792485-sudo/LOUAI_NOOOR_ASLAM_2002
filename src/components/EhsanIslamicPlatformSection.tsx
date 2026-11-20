@@ -324,10 +324,10 @@ export default function EhsanIslamicPlatformSection({ settings, isEn = false }: 
         <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0">
           <button
             id="quick-banner-donate-btn"
-            onClick={() => setIsInAppBrowserOpen(true)}
+            onClick={() => void handleOpenEhsan()}
             className="flex-1 md:flex-none py-3 px-6 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 group"
           >
-            <span>تبرع الآن (ehsan.sa)</span>
+            <span>فتح التبرع الرسمي (ehsan.sa)</span>
             <ExternalLink className="w-4 h-4" />
           </button>
         </div>
