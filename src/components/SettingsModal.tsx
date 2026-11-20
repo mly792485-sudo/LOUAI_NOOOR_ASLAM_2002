@@ -233,7 +233,24 @@ export default function SettingsModal({
 
         {/* Content */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
-          <OfflineContentManager isEn={isEn} />
+          <nav aria-label={isEn ? 'Settings sections' : 'أقسام الإعدادات'} className="sticky top-0 z-20 -mx-1 rounded-2xl border border-emerald-500/15 bg-[#FCFAF6]/95 dark:bg-[#070D0E]/95 p-2 backdrop-blur-md">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[
+                ['settings-preferences', isEn ? 'Appearance' : 'المظهر واللغة'],
+                ['settings-prayer', isEn ? 'Prayer' : 'الصلاة'],
+                ['settings-alerts', isEn ? 'Alerts' : 'التنبيهات'],
+                ['settings-offline', isEn ? 'Offline' : 'دون إنترنت'],
+              ].map(([id, label]) => (
+                <a key={id} href={`#${id}`} className="rounded-xl bg-emerald-500/10 px-2 py-2 text-center text-[11px] font-black text-emerald-800 transition-colors hover:bg-emerald-500/20 dark:text-emerald-200">
+                  {label}
+                </a>
+              ))}
+            </div>
+          </nav>
+
+          <div id="settings-offline" className="scroll-mt-20">
+            <OfflineContentManager isEn={isEn} />
+          </div>
           
           {/* 1. Dedication and Developer Details */}
           <div className="p-5 bg-gradient-to-br from-emerald-600/10 via-amber-500/5 to-teal-600/10 dark:from-emerald-950/40 dark:to-slate-950/40 border border-emerald-500/20 rounded-3xl space-y-3.5">
@@ -297,7 +314,7 @@ export default function SettingsModal({
           </div>
 
           {/* 2. App Preferences & Language */}
-          <div className="space-y-3.5">
+          <div id="settings-preferences" className="space-y-3.5 scroll-mt-20">
             <h5 className="text-xs font-black text-slate-800 dark:text-slate-200 border-r-4 rtl:border-r-4 ltr:border-l-4 border-emerald-500 pr-2 ltr:pl-2">
               {isEn ? 'App Preferences & Appearance' : 'تفضيلات التطبيق واللغة والمظهر'}
             </h5>
@@ -412,7 +429,7 @@ export default function SettingsModal({
             </div>
 
             {/* Prayer Calculation Method */}
-            <div className="flex flex-col gap-1.5 p-3.5 bg-white dark:bg-[#0B1516] rounded-2xl border border-[#EBE7DF] dark:border-[#132326]">
+            <div id="settings-prayer" className="scroll-mt-20 flex flex-col gap-1.5 p-3.5 bg-white dark:bg-[#0B1516] rounded-2xl border border-[#EBE7DF] dark:border-[#132326]">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 {isEn ? "Prayer Calculation Method:" : "طريقة حساب مواقيت الصلاة:"}
               </label>
@@ -469,7 +486,7 @@ export default function SettingsModal({
           </div>
 
           {/* 3. Native Notifications System Section */}
-          <div className="space-y-3.5">
+          <div id="settings-alerts" className="space-y-3.5 scroll-mt-20">
             <h5 className="text-xs font-black text-slate-800 dark:text-slate-200 border-r-4 rtl:border-r-4 ltr:border-l-4 border-emerald-500 pr-2 ltr:pl-2 flex items-center justify-between">
               <span>{isEn ? "Native Notifications & Alerts" : "نظام الإشعارات والتنبيهات الحقيقية"}</span>
             </h5>

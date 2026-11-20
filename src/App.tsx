@@ -1302,18 +1302,21 @@ export default function App() {
 
         </div>
 
-        {/* Dynamic Hijri & Gregorian clock display (Hidden on small screens) */}
-        <div className="hidden lg:flex flex-col items-center justify-center text-center bg-[#F4EFE6]/70 dark:bg-[#0C1517] px-4.5 py-1.5 rounded-2xl border border-[#E9E1D2]/60 dark:border-[#1A2D31]/60">
-          <div className="flex items-center gap-2 text-xs font-black text-emerald-900 dark:text-emerald-300">
-            <CalendarIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span className="font-kufi">🌙 {isEn ? "Hijri:" : "الهجري:"} {getHijriDate()}</span>
+        {/* Keep the date visible on the home dashboard only. Section pages own
+            their date context, which avoids repeating the same date in every page. */}
+        {activeSection === null && (
+          <div className="hidden lg:flex flex-col items-center justify-center text-center bg-[#F4EFE6]/70 dark:bg-[#0C1517] px-4.5 py-1.5 rounded-2xl border border-[#E9E1D2]/60 dark:border-[#1A2D31]/60">
+            <div className="flex items-center gap-2 text-xs font-black text-emerald-900 dark:text-emerald-300">
+              <CalendarIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span className="font-kufi">🌙 {isEn ? "Hijri:" : "الهجري:"} {getHijriDate()}</span>
+            </div>
+            <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 font-bold mt-0.5">
+              <span>📅 {isEn ? "Gregorian:" : "الميلادي:"} {getGregorianDate()}</span>
+              <span className="text-slate-300 dark:text-slate-700">|</span>
+              <span className="font-mono text-emerald-700 dark:text-amber-400 font-extrabold">{currentTime.toLocaleTimeString(isEn ? 'en-US' : 'ar-EG')}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 font-bold mt-0.5">
-            <span>📅 {isEn ? "Gregorian:" : "الميلادي:"} {getGregorianDate()}</span>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-            <span className="font-mono text-emerald-700 dark:text-amber-400 font-extrabold">{currentTime.toLocaleTimeString(isEn ? 'en-US' : 'ar-EG')}</span>
-          </div>
-        </div>
+        )}
 
         {/* Right Side (LTR): Title and Mosque Logo with RTL text rendering */}
         <div 
@@ -1485,57 +1488,6 @@ export default function App() {
                     isEn={isEn}
                     countryCode={findCountryAndCity(settings.country, settings.city).country.code}
                   />
-
-                  {/* Daily Worship Tracker Checklist ("مسار الطاعات اليومي") */}
-                  <div className="bg-white dark:bg-[#0B1516] border border-[#EBE7DF] dark:border-[#132326] rounded-3xl sm:rounded-[2.5rem] p-4 sm:p-6 shadow-xs hover:shadow-sm transition-all">
-                    
-                    <div className="flex items-center justify-between pb-3.5 border-b border-[#EBE7DF] dark:border-[#132326] mb-4">
-                      <div className="flex items-center gap-2">
-                        <Award className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                        <span className="text-xs font-black text-emerald-950 dark:text-emerald-300 font-kufi">{isEn ? "Daily Acts of Worship Tracker" : "مسار الطاعات والالتزام اليومي"}</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded-lg">{isEn ? "Daily Reset" : "تتجدد يوميًا"}</span>
-                    </div>
-
-                    {/* Prayer and Dhikr list with luxury checkboxes */}
-                    <div className="space-y-2.5">
-                      
-                      {[
-                        { key: 'Fajr', label: isEn ? 'Fajr Prayer on time' : 'صلاة الفجر في وقتها' },
-                        { key: 'Dhuhr', label: isEn ? 'Dhuhr Prayer in congregation' : 'صلاة الظهر في جماعة' },
-                        { key: 'Asr', label: isEn ? 'Asr Prayer and Sunnah' : 'صلاة العصر والسنّة البعدية' },
-                        { key: 'Maghrib', label: isEn ? 'Maghrib Prayer and Wird' : 'صلاة المغرب وأورادها' },
-                        { key: 'Isha', label: isEn ? 'Isha Prayer and Witr' : 'صلاة العشاء والوتر قيامًا' },
-                        { key: 'Duha', label: isEn ? 'Duha Prayer' : 'صلاة الضحى (الأوابين)' },
-                        { key: 'AzkarSabah', label: isEn ? 'Morning Adhkar' : 'قراءة أذكار الصباح كاملة' },
-                        { key: 'AzkarMasaa', label: isEn ? 'Evening Adhkar' : 'قراءة أذكار المساء كاملة' },
-                        { key: 'Fasting', label: isEn ? 'Voluntary Fasting (Mon/Thu/White Days)' : 'صيام التطوع (الإثنين/الخميس/الأيام البيض)' },
-                      ].map((p) => {
-                        const checked = dailyPrayers[p.key as keyof typeof dailyPrayers] || false;
-                        return (
-                          <div 
-                            key={p.key}
-                            onClick={() => toggleDailyPrayer(p.key)}
-                            className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none active:scale-[0.99] ${
-                              checked 
-                                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-900 dark:text-emerald-300 font-bold' 
-                                : 'bg-[#FAF8F5]/60 dark:bg-[#060B0C] border-[#E9E1D2]/50 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-[#122427] text-slate-600 dark:text-slate-400'
-                            }`}
-                          >
-                            <span className="text-xs font-semibold">{p.label}</span>
-                            <div className={`w-5 h-5 rounded-lg flex items-center justify-center border transition-all ${
-                              checked 
-                                ? 'bg-emerald-600 border-transparent text-white' 
-                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#060B0C]'
-                            }`}>
-                              {checked && <CheckCircle2 className="w-3.5 h-3.5 fill-current text-white" />}
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                    </div>
-                  </div>
 
                 </div>
 

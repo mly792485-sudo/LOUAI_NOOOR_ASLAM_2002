@@ -398,7 +398,7 @@ export default function VerseOfTheDay({ settings }: VerseOfTheDayProps) {
       {/* 2. Premium Image Share Customizer Modal */}
       <AnimatePresence>
         {isShareModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="fixed inset-0 z-[1100] flex items-start sm:items-center justify-center px-3 sm:p-4 pt-[max(env(safe-area-inset-top),18px)] pb-[max(env(safe-area-inset-bottom),18px)] overflow-y-auto">
             
             {/* Dark backing overlay */}
             <motion.div
@@ -415,7 +415,7 @@ export default function VerseOfTheDay({ settings }: VerseOfTheDayProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative w-full max-w-2xl bg-white dark:bg-[#0B1516] border border-[#EBE7DF] dark:border-[#132326] rounded-3xl overflow-hidden shadow-2xl z-10 flex flex-col max-h-[90vh] text-right"
+              className="relative w-full max-w-2xl bg-white dark:bg-[#0B1516] border border-[#EBE7DF] dark:border-[#132326] rounded-3xl overflow-hidden shadow-2xl z-10 flex flex-col max-h-[calc(100vh-36px)] text-right"
               dir="rtl"
             >
               
@@ -434,7 +434,9 @@ export default function VerseOfTheDay({ settings }: VerseOfTheDayProps) {
                 <button
                   id="close-share-modal-btn"
                   onClick={() => setIsShareModalOpen(false)}
-                  className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer active:scale-95"
+                  aria-label="إغلاق مشاركة الآية"
+                  title="إغلاق"
                 >
                   <X className="w-5 h-5" />
                 </button>

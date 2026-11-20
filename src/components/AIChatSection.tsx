@@ -184,7 +184,7 @@ export default function AIChatSection({ isEn = false }: AIChatSectionProps) {
     } catch (e) {
       const rawError = e instanceof Error ? e.message : '';
       const errorMessage = rawError === 'ASSISTANT_SERVICE_UNAVAILABLE'
-        ? (isEn ? 'The assistant server is not connected in this build. For the web build, set VITE_API_BASE_URL to the public HTTPS URL of server.ts. For a native build, rebuild with the same public URL configured in the mobile build workflow.' : 'لم يتم ربط خادم المستشار بهذه النسخة. للويب أضف VITE_API_BASE_URL إلى رابط HTTPS عام لخادم server.ts، ولنسخة Android وiPhone أعد البناء بعد ضبط الرابط نفسه في إعدادات البناء.')
+        ? (isEn ? 'The assistant service is not available in this version. Please try again later or continue reading the offline content.' : 'خدمة المستشار غير متاحة في هذه النسخة حاليًا. حاول مرة أخرى لاحقًا، ويمكنك متابعة قراءة المحتوى المحفوظ دون إنترنت.')
         : e instanceof DOMException && e.name === 'AbortError'
         ? (isEn ? 'The assistant took too long to respond. Please try again.' : 'استغرق الخادم وقتًا طويلًا. يرجى المحاولة مرة أخرى.')
         : rawError

@@ -116,13 +116,15 @@ export default function MakkahLiveRadioPlayer({ isEn = false, countryCode = 'BH'
             countryCode: item.countrycode,
           }));
         const seen = new Set<string>();
-        const localStations = discovered.length > 0 ? discovered : STATIONS;
-        const merged = [...localStations, ...discovered, ...STATIONS].filter((station) => {
+        // Prefer stations discovered for the user's country. Keep one bundled
+        // Quran fallback so the player remains usable when discovery is empty.
+        const merged = [...(discovered.length > 0 ? discovered : STATIONS), ...(discovered.length > 0 ? [STATIONS[0]] : [])].filter((station) => {
           if (seen.has(station.url)) return false;
           seen.add(station.url);
           return true;
         });
         setStations(merged);
+        if (merged[0]) setSelectedStation(merged[0]);
       })
       .catch(() => { /* Keep the bundled official-page fallbacks when discovery is offline. */ });
     return () => { cancelled = true; };
