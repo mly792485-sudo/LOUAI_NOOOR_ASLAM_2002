@@ -26,6 +26,7 @@ import {
   Plus,
   Minus,
   Award,
+  Star,
   ArrowRight,
   RefreshCw,
   Play,
@@ -70,6 +71,8 @@ import IslamicCalendarSection from './components/IslamicCalendarSection';
 import ZakatCalculatorSection from './components/ZakatCalculatorSection';
 import OriginalOnboardingWizard from './components/OriginalOnboardingWizard';
 import AccountModal from './components/AccountModal';
+import ProfileSection from './components/ProfileSection';
+import KnowledgeSection from './components/KnowledgeSection';
 import { getAppDistributionUrl } from './services/appDistribution';
 import { ISLAMIC_AVATARS } from './assets/avatars';
 import { requestAllPermissions, scheduleAllNativeNotifications, checkPermissionsStatus, NativePrayerScheduleDay } from './utils/nativeNotifications';
@@ -1072,6 +1075,51 @@ export default function App() {
       component: <QuranSection isEn={isEn} />
     },
     {
+      id: 'prophets',
+      title: isEn ? 'Prophets and Messengers' : 'قصص الأنبياء والرسل',
+      desc: isEn ? 'Verified Quranic stories with sources and lessons' : 'قصص موثقة مرتبطة بآيات القرآن ومصادرها',
+      icon: <BookOpen className="w-6 h-6" />,
+      colorClass: 'from-emerald-700 to-cyan-700',
+      bgLight: 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20',
+      component: <KnowledgeSection id="prophets" isEn={isEn} />
+    },
+    {
+      id: 'seerah',
+      title: isEn ? 'Prophetic Seerah' : 'السيرة النبوية',
+      desc: isEn ? 'A dedicated timeline of the Prophet’s life' : 'حياة النبي ﷺ وأحداث السيرة من مصادرها',
+      icon: <BookOpenCheck className="w-6 h-6" />,
+      colorClass: 'from-teal-700 to-emerald-700',
+      bgLight: 'bg-teal-500/10 text-teal-800 border-teal-500/20',
+      component: <KnowledgeSection id="seerah" isEn={isEn} />
+    },
+    {
+      id: 'companions',
+      title: isEn ? 'Companions and Followers' : 'الصحابة والتابعون',
+      desc: isEn ? 'Biographies and verified historical accounts' : 'تراجم الصحابة والتابعين ومواقفهم الموثقة',
+      icon: <Heart className="w-6 h-6" />,
+      colorClass: 'from-amber-600 to-orange-600',
+      bgLight: 'bg-amber-500/10 text-amber-800 border-amber-500/20',
+      component: <KnowledgeSection id="companions" isEn={isEn} />
+    },
+    {
+      id: 'islamic-stories',
+      title: isEn ? 'Islamic Stories' : 'قصص إسلامية متنوعة',
+      desc: isEn ? 'Quranic stories, righteous people and Islamic history' : 'قصص القرآن والصالحين والتاريخ الإسلامي مع المصادر',
+      icon: <Sparkles className="w-6 h-6" />,
+      colorClass: 'from-indigo-600 to-purple-600',
+      bgLight: 'bg-indigo-500/10 text-indigo-800 border-indigo-500/20',
+      component: <KnowledgeSection id="islamic-stories" isEn={isEn} />
+    },
+    {
+      id: 'fiqh',
+      title: isEn ? 'Worship and Fiqh' : 'العبادات والفقه',
+      desc: isEn ? 'Educational worship guidance with scholarly references' : 'تعليم العبادات والفقه مع إحالة المسائل الخاصة للعلماء',
+      icon: <Shield className="w-6 h-6" />,
+      colorClass: 'from-sky-700 to-indigo-700',
+      bgLight: 'bg-sky-500/10 text-sky-800 border-sky-500/20',
+      component: <KnowledgeSection id="fiqh" isEn={isEn} />
+    },
+    {
       id: 'tasbih',
       title: isEn ? 'Smart Digital Tasbih' : 'التسبيح الإلكتروني الذكي',
       desc: isEn ? 'Counter for Dhikr & Istighfar with custom goals & stats' : 'عداد للاستغفار والأذكار مع أهداف مخصصة وسجل كلي',
@@ -1159,6 +1207,33 @@ export default function App() {
       component: <HadithSection isEn={isEn} />
     },
     {
+      id: 'names-of-allah',
+      title: isEn ? 'Names of Allah' : 'أسماء الله الحسنى',
+      desc: isEn ? 'The beautiful names with evidence and meanings' : 'أسماء الله الحسنى ومعانيها من مصادر موثوقة',
+      icon: <Star className="w-6 h-6" />,
+      colorClass: 'from-yellow-600 to-amber-600',
+      bgLight: 'bg-yellow-500/10 text-yellow-800 border-yellow-500/20',
+      component: <KnowledgeSection id="names-of-allah" isEn={isEn} />
+    },
+    {
+      id: 'afterlife',
+      title: isEn ? 'The Afterlife' : 'الجنة والنار والآخرة',
+      desc: isEn ? 'Quran and authentic Sunnah on the Hereafter' : 'موضوعات الآخرة من القرآن والسنة الصحيحة',
+      icon: <Shield className="w-6 h-6" />,
+      colorClass: 'from-rose-700 to-red-700',
+      bgLight: 'bg-rose-500/10 text-rose-800 border-rose-500/20',
+      component: <KnowledgeSection id="afterlife" isEn={isEn} />
+    },
+    {
+      id: 'challenges',
+      title: isEn ? 'Islamic Challenges' : 'التحديات والمعلومات الإسلامية',
+      desc: isEn ? 'Source-based questions, quizzes and learning progress' : 'أسئلة ومسابقات إسلامية مع مصادر وإحصاءات تعلم',
+      icon: <Award className="w-6 h-6" />,
+      colorClass: 'from-fuchsia-600 to-purple-700',
+      bgLight: 'bg-fuchsia-500/10 text-fuchsia-800 border-fuchsia-500/20',
+      component: <KnowledgeSection id="challenges" isEn={isEn} />
+    },
+    {
       id: 'islamic-library',
       title: isEn ? 'Islamic Library' : 'المكتبة الإسلامية',
       desc: isEn ? 'Podcasts, Quran recitations, lessons, official sources and Quran quiz' : 'بودكاست وتلاوات ودروس ومصادر رسمية ومسابقات القرآن الكريم',
@@ -1207,6 +1282,24 @@ export default function App() {
       colorClass: 'from-emerald-800 to-teal-900',
       bgLight: 'bg-emerald-900/10 text-emerald-950 border-emerald-900/20',
       component: <AIChatSection isEn={isEn} />
+    },
+    {
+      id: 'profile',
+      title: isEn ? 'Personal Account' : 'الحساب الشخصي',
+      desc: isEn ? 'Progress, favorites, khatma and personal settings' : 'المفضلة والتقدم والختمة والإنجازات الشخصية',
+      icon: <CircleUserRound className="w-6 h-6" />,
+      colorClass: 'from-cyan-700 to-blue-700',
+      bgLight: 'bg-cyan-500/10 text-cyan-800 border-cyan-500/20',
+      component: <ProfileSection settings={settings} isEn={isEn} onNavigateSection={handleNavigateToSection} />
+    },
+    {
+      id: 'admin-dashboard',
+      title: isEn ? 'Administration Dashboard' : 'لوحة تحكم الإدارة',
+      desc: isEn ? 'Protected content management area' : 'لوحة إدارة محمية لإدارة المحتوى والمستخدمين',
+      icon: <Settings className="w-6 h-6" />,
+      colorClass: 'from-slate-700 to-slate-900',
+      bgLight: 'bg-slate-500/10 text-slate-800 border-slate-500/20',
+      component: <KnowledgeSection id="admin-dashboard" isEn={isEn} />
     }
   ], [isEn, settings, handleUpdateSettings, handleNavigateToSection]);
 
