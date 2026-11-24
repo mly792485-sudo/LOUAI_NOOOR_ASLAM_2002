@@ -1514,18 +1514,6 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Center: Glowing Circular App Logo */}
-                    <div className="relative z-10 my-1">
-                      <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden border-3 border-amber-400/80 shadow-2xl shadow-amber-500/20 p-1 bg-gradient-to-br from-emerald-700 via-teal-900 to-slate-950 ring-4 ring-emerald-500/20">
-                        <img 
-                          src={settings.appLogoUrl || defaultLogo} 
-                          alt="Logo" 
-                          className="w-full h-full object-cover rounded-full"
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
-                    </div>
-
                     {/* Bottom: Welcome Title & Spiritual Message */}
                     <div className="relative z-10 space-y-1.5 max-w-lg">
                       <h2 className="text-lg sm:text-xl font-black font-kufi text-amber-300 drop-shadow-sm leading-tight">

@@ -35,11 +35,7 @@ interface RuqyahItem {
 }
 
 const RUQYAH_RECITERS = [
-  { id: 'alafasy', name: 'الشيخ مشاري بن راشد العفاسي', url: '/audio/ruqyah_mishary_alafasy.mp3' },
-  { id: 'ajmy', name: 'الشيخ أحمد بن علي العجمي', url: 'https://download.quranicaudio.com/ruqyah/ahmed_bin_ali_al-ajmy_ruqyah.mp3' },
-  { id: 'dosari', name: 'الشيخ ياسر الدوسري', url: 'https://download.quranicaudio.com/ruqyah/yasser_ad-dussary_ruqyah.mp3' },
-  { id: 'ghamdi', name: 'الشيخ سعد الغامدي', url: 'https://download.quranicaudio.com/ruqyah/saad_al-ghamdi_ruqyah.mp3' },
-  { id: 'shatri', name: 'الشيخ أبو بكر الشاطري', url: 'https://download.quranicaudio.com/ruqyah/abu_bakr_al_shatri_ruqyah.mp3' }
+  { id: 'alafasy', name: 'الرقية الشرعية الكاملة — مشاري راشد العفاسي', url: '/audio/ruqyah_mishary_alafasy.mp3' }
 ];
 
 const QURAN_VERSES: RuqyahItem[] = [
