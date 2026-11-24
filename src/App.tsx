@@ -1553,19 +1553,13 @@ export default function App() {
                         <div className={`absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-1.5 h-full bg-gradient-to-b from-transparent via-amber-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity`}></div>
                         <div className="flex items-start gap-3 flex-1 min-w-0">
                           {/* 3D Islamic Avatar Box */}
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden border border-emerald-500/30 dark:border-emerald-500/20 shadow-md shadow-emerald-900/10 group-hover:scale-105 group-hover:rotate-2 group-hover:shadow-amber-500/20 transition-all duration-300 flex-shrink-0 relative bg-emerald-950">
-                            {sec.avatarUrl ? (
-                              <img 
-                                src={sec.avatarUrl} 
-                                alt={sec.title} 
-                                className="w-full h-full object-cover" 
-                                referrerPolicy="no-referrer" 
-                              />
-                            ) : (
-                              <div className={`w-full h-full bg-gradient-to-tr ${sec.colorClass} text-white flex items-center justify-center`}>
-                                {sec.icon}
-                              </div>
-                            )}
+                          <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden border border-amber-300/40 dark:border-emerald-400/30 shadow-md shadow-emerald-900/10 group-hover:scale-105 group-hover:rotate-2 group-hover:shadow-amber-500/20 transition-all duration-300 flex-shrink-0 relative bg-gradient-to-br ${sec.colorClass} flex items-center justify-center`}>
+                            {sec.avatarUrl && <img src={sec.avatarUrl} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-25" referrerPolicy="no-referrer" />}
+                            <span className="relative z-10 inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl border border-amber-200/70 bg-emerald-950/80 text-amber-200 shadow-lg shadow-black/20">
+                              <span className="absolute inset-[3px] rounded-xl border border-white/20" aria-hidden="true" />
+                              <span className="relative">{sec.icon}</span>
+                              <span className="absolute -right-1 -top-1 text-[9px] leading-none text-amber-300" aria-hidden="true">✦</span>
+                            </span>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                           </div>
 
