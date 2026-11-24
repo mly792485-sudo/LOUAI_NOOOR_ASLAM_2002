@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { BookOpen, Search, Copy, CheckCircle, Quote } from 'lucide-react';
 import { hadithsData } from '../data/hadith';
+import { HADITH_COLLECTIONS } from '../data/hadith_collections';
 
 interface HadithSectionProps {
   isEn?: boolean;
@@ -51,9 +52,22 @@ export default function HadithSection({ isEn = false }: HadithSectionProps) {
           <h3 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">{isEn ? 'Noble Prophetic Hadiths' : 'الأحاديث النبوية الشريفة'}</h3>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          {isEn ? 'Selected authentic Hadiths from Sahih Al-Bukhari & Sahih Muslim' : 'مقتطفات مختارة من صحيحي البخاري ومسلم'}
+          {isEn ? 'Verified local selections with source and narrator' : 'أحاديث محلية مختارة مع الراوي والمصدر، وليست نسخًا كاملة لكتب الحديث'}
         </p>
       </div>
+
+      <details className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-3 dark:border-slate-800 dark:bg-slate-950/40">
+        <summary className="cursor-pointer text-xs font-black text-emerald-800 dark:text-emerald-300">{isEn ? 'Hadith source library' : 'فهرس مصادر الحديث المعتمدة'}</summary>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {HADITH_COLLECTIONS.map((collection) => (
+            <div key={collection.title} className="rounded-xl border border-emerald-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+              <p className="text-xs font-black text-slate-800 dark:text-slate-100">{collection.title}</p>
+              <p className="mt-1 text-[10px] leading-5 text-slate-500 dark:text-slate-400">{collection.description}</p>
+              <p className="mt-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">{collection.scope}</p>
+            </div>
+          ))}
+        </div>
+      </details>
 
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-3">

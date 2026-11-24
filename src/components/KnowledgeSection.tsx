@@ -4,8 +4,9 @@ import { safeStorage } from '../utils/safeStorage';
 import { EXPANDED_PROPHET_STORIES } from '../data/prophets_stories_expanded';
 import { SEERAH_ENTRIES } from '../data/seerah';
 import { COMPANIONS_ENTRIES } from '../data/companions';
-import { AFTERLIFE_ENTRIES, FIQH_ENTRIES, ISLAMIC_STORIES } from '../data/knowledge_expanded';
+import { AFTERLIFE_ENTRIES, ISLAMIC_STORIES } from '../data/knowledge_expanded';
 import { ALLAH_NAMES_99_ENTRIES } from '../data/allah_names_99';
+import { COMPREHENSIVE_FIQH_ENTRIES } from '../data/fiqh_comprehensive';
 
 export type KnowledgeSectionId =
   | 'prophets'
@@ -49,7 +50,7 @@ const CONTENT: Record<KnowledgeSectionId, { ar: string; en: string; introAr: str
   fiqh: {
     ar: 'العبادات والفقه', en: 'Worship and Fiqh',
     introAr: 'موسوعة تعليمية لأبواب الطهارة والصلاة والصيام والزكاة والحج والمعاملات، مع بيان الخلاف وعدم تقديم فتوى شخصية.', introEn: 'Offline learning topics for purification, prayer, fasting, zakat, hajj and transactions, without personal fatwas.',
-    cards: FIQH_ENTRIES,
+    cards: COMPREHENSIVE_FIQH_ENTRIES,
   },
   'names-of-allah': {
     ar: 'أسماء الله الحسنى', en: 'Names of Allah',
