@@ -1649,8 +1649,8 @@ export default function App() {
 
                 </div>
 
-                {/* Bottom Row: Horizontal Quick-Switch Scrollable Strip of All Sections */}
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-0.5 scrollbar-none text-xs sm:text-sm">
+                {/* Bottom Row: Wrapped quick-switch menu so every section remains visible on phones */}
+                <div className="flex flex-wrap items-center gap-2.5 pb-1 pt-0.5 text-xs sm:text-sm">
                   
                   {/* Home tab pill */}
                   <button
@@ -1662,7 +1662,7 @@ export default function App() {
                     <span className="text-sm">🏠</span>
                   </button>
 
-                  {/* All 11 Sections tab pills */}
+                  {/* All sections tab pills; they wrap instead of hiding off-screen */}
                   {sections.map((s) => {
                     const isActive = s.id === activeSection;
                     return (
