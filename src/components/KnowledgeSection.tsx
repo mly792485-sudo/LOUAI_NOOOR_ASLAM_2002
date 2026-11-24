@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { BookOpen, CheckCircle2, ChevronDown, LockKeyhole, Search, ShieldCheck, Star } from 'lucide-react';
 import { safeStorage } from '../utils/safeStorage';
 import { PROPHET_STORIES } from '../data/prophets_stories';
+import { SEERAH_ENTRIES } from '../data/seerah';
 
 export type KnowledgeSectionId =
   | 'prophets'
@@ -29,12 +30,8 @@ const CONTENT: Record<KnowledgeSectionId, { ar: string; en: string; introAr: str
   },
   seerah: {
     ar: 'السيرة النبوية', en: 'Prophetic Seerah',
-    introAr: 'قسم مستقل للسيرة النبوية وأحداثها ومواقفها وأخلاق النبي ﷺ، مع إظهار المصدر لكل مادة.', introEn: 'A dedicated seerah section with sources shown for every item.',
-    cards: [
-      { title: 'من المولد إلى البعثة', description: 'خط زمني للسيرة يحتاج إدخالاً موثقاً قبل اعتماده داخل التطبيق.', source: 'كتب السيرة المعتمدة' },
-      { title: 'الهجرة والغزوات', description: 'أحداث مرتبة زمنياً مع التفريق بين الروايات الثابتة وما يحتاج إلى بيان.', source: 'مصادر السيرة والتاريخ' },
-      { title: 'الأخلاق والمواقف', description: 'مواقف صحيحة مع تخريج الروايات، دون اختصار يغير المعنى.', source: 'الصحيح من السنة' },
-    ],
+    introAr: 'خط زمني داخلي واسع للسيرة من النشأة والبعثة إلى الهجرة والغزوات وحجة الوداع والوفاة، مع أبواب للأسرة والأخلاق والمراجع.', introEn: 'An offline timeline from early life and revelation through migration, expeditions, the Farewell Pilgrimage, passing, family and character.',
+    cards: SEERAH_ENTRIES,
   },
   companions: {
     ar: 'الصحابة والتابعون', en: 'Companions and Followers',
