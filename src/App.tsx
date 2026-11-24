@@ -1442,22 +1442,6 @@ export default function App() {
 
         </div>
 
-        {/* Keep the date visible on the home dashboard only. Section pages own
-            their date context, which avoids repeating the same date in every page. */}
-        {activeSection === null && (
-          <div className="hidden lg:flex flex-col items-center justify-center text-center bg-[#F4EFE6]/70 dark:bg-[#0C1517] px-4.5 py-1.5 rounded-2xl border border-[#E9E1D2]/60 dark:border-[#1A2D31]/60">
-            <div className="flex items-center gap-2 text-xs font-black text-emerald-900 dark:text-emerald-300">
-              <CalendarIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span className="font-kufi">🌙 {isEn ? "Hijri:" : "الهجري:"} {getHijriDate()}</span>
-            </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 font-bold mt-0.5">
-              <span>📅 {isEn ? "Gregorian:" : "الميلادي:"} {getGregorianDate()}</span>
-              <span className="text-slate-300 dark:text-slate-700">|</span>
-              <span className="font-mono text-emerald-700 dark:text-amber-400 font-extrabold">{currentTime.toLocaleTimeString(isEn ? 'en-US' : 'ar-EG')}</span>
-            </div>
-          </div>
-        )}
-
         {/* Right Side (LTR): Title and Mosque Logo with RTL text rendering */}
         <div 
           onClick={() => handleNavigateToSection(null)}
@@ -1524,10 +1508,9 @@ export default function App() {
                         {getDynamicGreeting()}
                       </span>
                       
-                      <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/15 text-[11px] font-bold text-amber-300 shadow-xs">
-                        <span className="text-emerald-300 font-bold whitespace-nowrap">🌙 {getHijriDate()}</span>
-                        <span className="text-white/30">•</span>
-                        <span className="text-sky-200 font-bold whitespace-nowrap">📅 {getGregorianDate()}</span>
+                      <div className="flex flex-wrap items-center justify-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-white/15 text-[10px] sm:text-[11px] font-bold shadow-xs">
+                        <span className="rounded-xl border border-emerald-400/25 px-2 py-1 text-emerald-300 whitespace-nowrap">🌙 {isEn ? 'Hijri' : 'الهجري'}: {getHijriDate()}</span>
+                        <span className="rounded-xl border border-sky-400/25 px-2 py-1 text-sky-200 whitespace-nowrap">📅 {isEn ? 'Gregorian' : 'الميلادي'}: {getGregorianDate()}</span>
                       </div>
                     </div>
 
