@@ -4,6 +4,7 @@ import { safeStorage } from '../utils/safeStorage';
 import { PROPHET_STORIES } from '../data/prophets_stories';
 import { SEERAH_ENTRIES } from '../data/seerah';
 import { COMPANIONS_ENTRIES } from '../data/companions';
+import { ALLAH_NAMES_ENTRIES, AFTERLIFE_ENTRIES, FIQH_ENTRIES, ISLAMIC_STORIES } from '../data/knowledge_expanded';
 
 export type KnowledgeSectionId =
   | 'prophets'
@@ -41,39 +42,23 @@ const CONTENT: Record<KnowledgeSectionId, { ar: string; en: string; introAr: str
   },
   'islamic-stories': {
     ar: 'قصص إسلامية متنوعة', en: 'Islamic Stories',
-    introAr: 'قسم مستقل للقصص القرآنية وقصص الصالحين والتاريخ الإسلامي، مع بيان درجة الرواية ومصدرها.', introEn: 'A dedicated stories section with source and narration status.',
-    cards: [
-      { title: 'قصص القرآن', description: 'ربط القصة بمواضعها في المصحف، وعدم إضافة تفاصيل لم ترد في النص أو التفسير الموثق.', source: 'القرآن الكريم والتفسير' },
-      { title: 'قصص الصبر والتوبة', description: 'لا تُعرض القصة كحديث أو أثر إلا بعد التحقق من مصدرها ودرجتها.', source: 'مصادر الحديث والتاريخ' },
-      { title: 'التاريخ الإسلامي', description: 'مادة تعليمية مع فصل الخبر التاريخي عن النص الشرعي.', source: 'مراجع التاريخ الإسلامي' },
-    ],
+    introAr: 'قصص القرآن والابتلاء والتوبة والأمم السابقة، مع ربط كل قصة بموضعها وبيان ما يثبت وما لا يثبت.', introEn: 'Quranic stories, repentance, trials and earlier nations with source-aware presentation.',
+    cards: ISLAMIC_STORIES,
   },
   fiqh: {
     ar: 'العبادات والفقه', en: 'Worship and Fiqh',
-    introAr: 'قسم مستقل للعبادات والفقه، مع تنبيه أن المسائل الكبرى تحتاج سؤال عالم موثوق ولا يقدم التطبيق فتوى شخصية.', introEn: 'A dedicated worship and fiqh section with clear scholarly limitations.',
-    cards: [
-      { title: 'الصلاة والطهارة', description: 'أدلة تعليمية مرتبة من مصادر الفقه المعتبرة، مع بيان اختلاف المذاهب عند الحاجة.', source: 'كتب الفقه المعتمدة' },
-      { title: 'الصيام والزكاة والحج', description: 'محتوى تعليمي موثق، وليس بديلاً عن الفتوى الخاصة بالحالة.', source: 'مصادر الفقه الرسمية' },
-      { title: 'الأسئلة الفقهية', description: 'الأسئلة الحساسة مثل الطلاق والمواريث تُحال إلى عالم أو جهة إفتاء موثوقة.', source: 'إرشاد شرعي' },
-    ],
+    introAr: 'موسوعة تعليمية لأبواب الطهارة والصلاة والصيام والزكاة والحج والمعاملات، مع بيان الخلاف وعدم تقديم فتوى شخصية.', introEn: 'Offline learning topics for purification, prayer, fasting, zakat, hajj and transactions, without personal fatwas.',
+    cards: FIQH_ENTRIES,
   },
   'names-of-allah': {
     ar: 'أسماء الله الحسنى', en: 'Names of Allah',
-    introAr: 'قسم مستقل لأسماء الله الحسنى مع ضبط النص والمعنى والإحالة إلى مصادر العقيدة والتفسير.', introEn: 'A dedicated section for the beautiful names with source references.',
-    cards: [
-      { title: 'فهرس الأسماء', description: 'يعرض الاسم كما ورد في النصوص، ولا يثبت اسماً بلا دليل.', source: 'القرآن والسنة الصحيحة' },
-      { title: 'المعاني والشروح', description: 'شرح موجز من كتب أهل العلم، مع تجنب التفسيرات الإنشائية غير المنقولة.', source: 'كتب العقيدة والتفسير' },
-      { title: 'التدبر والدعاء', description: 'ربط المعنى بالدعاء المشروع دون اختراع صيغ أو فضائل غير ثابتة.', source: 'الأدعية المأثورة' },
-    ],
+    introAr: 'معانٍ مختصرة لأسماء وردت أدلتها، مع التنبيه أن حصر الأسماء يحتاج تحريرًا علميًا ولا يصح اعتماد قوائم غير موثقة.', introEn: 'Short sourced meanings for names established by revelation, with a clear methodology note.',
+    cards: ALLAH_NAMES_ENTRIES,
   },
   afterlife: {
     ar: 'الجنة والنار والآخرة', en: 'Afterlife',
-    introAr: 'قسم مستقل لموضوعات الآخرة كما وردت في القرآن والسنة الصحيحة، مع توضيح درجة الروايات.', introEn: 'A dedicated section for the afterlife based on Quran and authentic Sunnah.',
-    cards: [
-      { title: 'اليوم الآخر والحساب', description: 'عرض الآيات والأحاديث الصحيحة مع المصدر، دون قصص مرعبة أو تفاصيل بلا دليل.', source: 'القرآن والسنة الصحيحة' },
-      { title: 'الجنة والنار', description: 'موضوعات موثقة مع التفريق بين النص الصحيح والرواية الضعيفة.', source: 'كتب العقيدة والتفسير' },
-      { title: 'القبر والبرزخ', description: 'يُعرض من النصوص الثابتة فقط مع بيان درجة الحديث عند الحاجة.', source: 'مصادر الحديث' },
-    ],
+    introAr: 'أبواب اليوم الآخر من الموت والبرزخ والبعث والحساب إلى الجنة والنار، بالنصوص الثابتة دون قصص مرعبة أو إضافات.', introEn: 'Sourced topics from barzakh and resurrection to judgment, Paradise and Hell.',
+    cards: AFTERLIFE_ENTRIES,
   },
   challenges: {
     ar: 'التحديات والمعلومات الإسلامية', en: 'Islamic Challenges',
