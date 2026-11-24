@@ -282,6 +282,20 @@ const BAHRAIN_WEST = { latitude: 26.22, longitude: 50.44 };
 const BAHRAIN_TIMEZONE_OFFSET_HOURS = 3;
 export const BAHRAIN_OFFICIAL_SOURCE_URL = 'https://www.sunniwaqf.com/online/%D8%B4%D8%A4%D9%88%D9%86%20%D8%A7%D9%84%D9%85%D8%B3%D8%A7%D8%AC%D8%AF/Prayertime';
 
+// Built-in coordinates keep the selected Bahrain city usable in airplane mode.
+// GPS coordinates, when available, still take precedence over this table.
+const BUILT_IN_CITY_COORDINATES: Record<string, { latitude: number; longitude: number }> = {
+  'BH:Manama': { latitude: 26.2235, longitude: 50.5876 },
+  'BH:Muharraq': { latitude: 26.2572, longitude: 50.6119 },
+  'BH:Riffa': { latitude: 26.1300, longitude: 50.5550 },
+  'BH:Hamad Town': { latitude: 26.1150, longitude: 50.5069 },
+  'BH:Isa Town': { latitude: 26.1736, longitude: 50.5478 },
+  'BH:Sitra': { latitude: 26.1547, longitude: 50.6206 },
+};
+
+const getBuiltInCityCoordinates = (countryCode: string, cityName: string) =>
+  BUILT_IN_CITY_COORDINATES[`${countryCode}:${cityName}`];
+
 const degreesToRadians = (degrees: number) => (degrees * Math.PI) / 180;
 const radiansToDegrees = (radians: number) => (radians * 180) / Math.PI;
 
@@ -514,6 +528,7 @@ export async function getAccuratePrayerTimes(
     return Boolean(requestedCountry && (ar === requestedCountry || en === requestedCountry || ar.includes(requestedCountry) || requestedCountry.includes(ar) || en.includes(requestedCountry) || requestedCountry.includes(en)));
   });
   const effectiveCountryCode = knownCountry ? country.code : 'GLOBAL';
+  const localCoordinates = coordinates || getBuiltInCityCoordinates(effectiveCountryCode, city.en);
 
   // Auto selects the configured regional default. Every other method is
   // explicit and must never be silently replaced when the user travels.
@@ -521,6 +536,24 @@ export async function getAccuratePrayerTimes(
     ? (COUNTRY_DEFAULT_METHODS[effectiveCountryCode] || METHOD_IDS.MWL)
     : (METHOD_IDS[method] || METHOD_IDS.MWL);
   const cacheKey = prayerCacheKey(country.ar, city.ar, date, `${method}:${madhhab}:${JSON.stringify(offsets)}`, methodId, coordinates, highLatitudeRule);
+  // Do not wait eight seconds for an API that cannot be reached in airplane
+  // mode. The local adhan calculation is deterministic and uses the saved
+  // GPS position or the built-in coordinates for supported cities.
+  if (globalThis.navigator && navigator.onLine === false) {
+    const offlineTimes = calculateLocalPrayerTimes(localCoordinates, date, method, effectiveCountryCode, madhhab, highLatitudeRule, offsets);
+    if (offlineTimes) {
+      return {
+        source: 'local-calculation',
+        sourceUrl: 'local://adhan-calculation',
+        country: knownCountry ? country.ar : (countryName || country.ar),
+        city: coordinates ? 'موقعك الحالي' : city.ar,
+        timeZone: effectiveCountryCode === 'BH' ? 'Asia/Bahrain' : Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+        hijriDate: getHijriDate(date),
+        times: offlineTimes,
+      };
+    }
+  }
+
   try {
     const datePath = formatApiDate(date);
     const latitudeAdjustmentMethod = highLatitudeRule === 'angleBased' ? 1 : highLatitudeRule === 'middleOfTheNight' ? 2 : highLatitudeRule === 'oneSeventh' ? 3 : 0;
@@ -577,14 +610,14 @@ export async function getAccuratePrayerTimes(
     return { ...cached, source: 'cached-api' };
   }
 
-  const localTimes = calculateLocalPrayerTimes(coordinates, date, method, effectiveCountryCode, madhhab, highLatitudeRule, offsets);
+  const localTimes = calculateLocalPrayerTimes(localCoordinates, date, method, effectiveCountryCode, madhhab, highLatitudeRule, offsets);
   if (localTimes) {
     return {
       source: 'local-calculation',
       sourceUrl: 'local://adhan-calculation',
       country: knownCountry ? country.ar : (countryName || country.ar),
       city: coordinates ? 'موقعك الحالي' : city.ar,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+      timeZone: effectiveCountryCode === 'BH' ? 'Asia/Bahrain' : Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
       hijriDate: getHijriDate(date),
       times: localTimes,
     };
