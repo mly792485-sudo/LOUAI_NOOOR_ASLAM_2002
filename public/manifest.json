@@ -1,0 +1,26 @@
+{
+  "name": "نور الإسلام",
+  "short_name": "نور الإسلام",
+  "description": "موسوعة إسلامية محلية للصلاة والقرآن والأذكار والمحتوى الموثق",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#04090A",
+  "theme_color": "#04090A",
+  "icons": [
+    {
+      "src": "./app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
