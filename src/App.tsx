@@ -80,6 +80,7 @@ import OriginalOnboardingWizard from './components/OriginalOnboardingWizard';
 import AccountModal from './components/AccountModal';
 import ProfileSection from './components/ProfileSection';
 import KnowledgeSection from './components/KnowledgeSection';
+import InteractiveLearningSection from './components/InteractiveLearningSection';
 import { getAppDistributionUrl } from './services/appDistribution';
 import { ISLAMIC_AVATARS } from './assets/avatars';
 import { requestAllPermissions, scheduleAllNativeNotifications, checkPermissionsStatus, NativePrayerScheduleDay } from './utils/nativeNotifications';
@@ -1203,6 +1204,16 @@ export default function App() {
       component: <DailyWorshipSection isEn={isEn} />
     },
     {
+      id: 'daily-content',
+      title: isEn ? 'Daily Islamic Content' : 'المحتوى الإسلامي اليومي',
+      desc: isEn ? 'Daily verse, hadith, story, benefit and question saved on your device' : 'آية وحديث وقصة وفائدة وسؤال يومي محفوظة داخل التطبيق',
+      icon: <Sparkles className="w-6 h-6" />,
+      avatarUrl: ISLAMIC_AVATARS.tasbih,
+      colorClass: 'from-amber-600 to-rose-600',
+      bgLight: 'bg-amber-500/10 text-amber-800 border-amber-500/20',
+      component: <InteractiveLearningSection isEn={isEn} mode="daily" />
+    },
+    {
       id: 'islamic-calendar',
       title: isEn ? 'Hijri Calendar & Occasions' : 'التقويم الهجري والمناسبات',
       desc: isEn ? 'Follow the Hijri date, Ramadan, the two Eids and important occasions' : 'تابع التاريخ الهجري ورمضان والعيدين والمناسبات الإسلامية المهمة',
@@ -1267,7 +1278,7 @@ export default function App() {
       icon: <DecorativeSectionIcon><Trophy className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-fuchsia-600 to-purple-700',
       bgLight: 'bg-fuchsia-500/10 text-fuchsia-800 border-fuchsia-500/20',
-      component: <KnowledgeSection id="challenges" isEn={isEn} />
+      component: <InteractiveLearningSection isEn={isEn} mode="challenges" />
     },
     {
       id: 'islamic-library',
