@@ -139,6 +139,36 @@ function DecorativeSectionIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
+function getSectionIconFrameClass(sectionId: string) {
+  const styles: Record<string, string> = {
+    quran: 'rounded-[1.4rem] border-amber-300/70 bg-emerald-950/85 text-amber-200',
+    prophets: 'rounded-[0.65rem] border-cyan-200/70 bg-cyan-950/85 text-cyan-100 rotate-[-3deg]',
+    seerah: 'rounded-full border-teal-200/70 bg-teal-950/85 text-teal-100',
+    companions: 'rounded-[1.1rem_0.35rem_1.1rem_0.35rem] border-orange-200/70 bg-orange-950/85 text-orange-100',
+    'islamic-stories': 'rounded-[0.45rem] border-violet-200/70 bg-violet-950/85 text-violet-100 rotate-[3deg]',
+    fiqh: 'rounded-full border-sky-200/70 bg-sky-950/85 text-sky-100',
+    tasbih: 'rounded-[1.2rem] border-amber-200/70 bg-amber-950/85 text-amber-100',
+    azkar: 'rounded-[0.8rem_1.4rem_0.8rem_1.4rem] border-emerald-200/70 bg-emerald-950/85 text-emerald-100',
+    'prayer-times': 'rounded-[0.55rem] border-blue-200/70 bg-blue-950/85 text-blue-100',
+    'daily-worship': 'rounded-full border-rose-200/70 bg-rose-950/85 text-rose-100',
+    'islamic-calendar': 'rounded-[1.1rem] border-indigo-200/70 bg-indigo-950/85 text-indigo-100',
+    'zakat-calculator': 'rounded-[0.55rem_1.2rem] border-yellow-200/70 bg-yellow-950/85 text-yellow-100',
+    khatma: 'rounded-[1.4rem_0.55rem] border-purple-200/70 bg-purple-950/85 text-purple-100',
+    hadith: 'rounded-[0.7rem] border-teal-200/70 bg-teal-950/85 text-teal-100',
+    'names-of-allah': 'rounded-full border-yellow-200/70 bg-yellow-950/85 text-yellow-100',
+    afterlife: 'rounded-[1.4rem_0.5rem_1.4rem_0.5rem] border-red-200/70 bg-red-950/85 text-red-100',
+    challenges: 'rounded-[0.5rem_1.4rem] border-fuchsia-200/70 bg-fuchsia-950/85 text-fuchsia-100',
+    'islamic-library': 'rounded-[0.8rem] border-amber-200/70 bg-amber-950/85 text-amber-100',
+    ruqyah: 'rounded-full border-teal-200/70 bg-teal-950/85 text-teal-100',
+    qibla: 'rounded-[1.4rem] border-amber-200/70 bg-amber-950/85 text-amber-100 rotate-45',
+    'ehsan-charity': 'rounded-[1.4rem_0.6rem] border-emerald-200/70 bg-emerald-950/85 text-emerald-100',
+    'ai-assistant': 'rounded-full border-cyan-200/70 bg-cyan-950/85 text-cyan-100',
+    profile: 'rounded-full border-blue-200/70 bg-blue-950/85 text-blue-100',
+    'admin-dashboard': 'rounded-[0.55rem] border-slate-200/70 bg-slate-950/85 text-slate-100'
+  };
+  return styles[sectionId] || 'rounded-2xl border-amber-200/70 bg-emerald-950/85 text-amber-100';
+}
+
 export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isAccountOpen, setIsAccountOpen] = useState<boolean>(false);
@@ -1555,7 +1585,7 @@ export default function App() {
                           {/* 3D Islamic Avatar Box */}
                           <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden border border-amber-300/40 dark:border-emerald-400/30 shadow-md shadow-emerald-900/10 group-hover:scale-105 group-hover:rotate-2 group-hover:shadow-amber-500/20 transition-all duration-300 flex-shrink-0 relative bg-gradient-to-br ${sec.colorClass} flex items-center justify-center`}>
                             {sec.avatarUrl && <img src={sec.avatarUrl} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-25" referrerPolicy="no-referrer" />}
-                            <span className="relative z-10 inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl border border-amber-200/70 bg-emerald-950/80 text-amber-200 shadow-lg shadow-black/20">
+                            <span className={`relative z-10 inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center border shadow-lg shadow-black/20 transition-transform duration-300 group-hover:scale-110 ${getSectionIconFrameClass(sec.id)}`}>
                               <span className="absolute inset-[3px] rounded-xl border border-white/20" aria-hidden="true" />
                               <span className="relative">{sec.icon}</span>
                               <span className="absolute -right-1 -top-1 text-[9px] leading-none text-amber-300" aria-hidden="true">✦</span>
