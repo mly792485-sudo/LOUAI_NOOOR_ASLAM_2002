@@ -1643,7 +1643,9 @@ export default function App() {
                       {sections.find(s => s.id === activeSection)?.title}
                     </h2>
                     <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-500 text-white flex items-center justify-center p-2.5 shadow-md shadow-emerald-950/40 shrink-0 border border-emerald-400/20 overflow-hidden">
-                      {sections.find(s => s.id === activeSection)?.icon || <BookOpen className="w-5 h-5 text-white" />}
+                      <span className="inline-flex h-6 w-6 items-center justify-center [&>span]:scale-[0.58] [&>svg]:h-5 [&>svg]:w-5">
+                        {sections.find(s => s.id === activeSection)?.icon || <BookOpen className="h-5 w-5 text-white" />}
+                      </span>
                     </div>
                   </div>
 
@@ -1677,7 +1679,7 @@ export default function App() {
                         }`}
                       >
                         <span className="whitespace-nowrap">{s.title}</span>
-                        <span className={isActive ? 'text-white' : 'text-emerald-400'}>
+                        <span className={`inline-flex h-5 w-5 items-center justify-center overflow-hidden ${isActive ? 'text-white' : 'text-emerald-400'} [&>span]:scale-[0.52] [&>svg]:h-4 [&>svg]:w-4`}>
                           {s.icon}
                         </span>
                       </button>
