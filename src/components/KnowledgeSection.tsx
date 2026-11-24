@@ -3,6 +3,7 @@ import { BookOpen, CheckCircle2, ChevronDown, LockKeyhole, Search, ShieldCheck, 
 import { safeStorage } from '../utils/safeStorage';
 import { PROPHET_STORIES } from '../data/prophets_stories';
 import { SEERAH_ENTRIES } from '../data/seerah';
+import { COMPANIONS_ENTRIES } from '../data/companions';
 
 export type KnowledgeSectionId =
   | 'prophets'
@@ -35,12 +36,8 @@ const CONTENT: Record<KnowledgeSectionId, { ar: string; en: string; introAr: str
   },
   companions: {
     ar: 'الصحابة والتابعون', en: 'Companions and Followers',
-    introAr: 'قسم مستقل للتعريف بالصحابة والصحابيات والخلفاء الراشدين والتابعين من مصادر التراجم الموثوقة.', introEn: 'A dedicated biographies section based on reliable biographical sources.',
-    cards: [
-      { title: 'الخلفاء الراشدون', description: 'بطاقات تعريفية ومواقف موثقة، مع مراجعة المصادر قبل نشر التفاصيل.', source: 'كتب التراجم والتاريخ المعتبرة' },
-      { title: 'الصحابة والصحابيات', description: 'بحث وفهرس للأسماء والمواقف، دون قصص شعبية بلا سند واضح.', source: 'مصادر الحديث والتراجم' },
-      { title: 'التابعون والعلماء', description: 'تصنيف زمني ومجالات العلم مع إحالة للمراجع.', source: 'كتب التراجم' },
-    ],
+    introAr: 'فهرس محلي موسع للصحابة والصحابيات والتابعين، مع تصنيف الاسم والمكانة العامة والمصدر. لا تُعرض الروايات المختلف فيها كحقائق قطعية.', introEn: 'An expanded offline index of Companions and Followers with source attribution and careful handling of disputed reports.',
+    cards: COMPANIONS_ENTRIES,
   },
   'islamic-stories': {
     ar: 'قصص إسلامية متنوعة', en: 'Islamic Stories',
