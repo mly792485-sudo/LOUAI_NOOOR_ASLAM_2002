@@ -49,8 +49,7 @@ import {
   HandHeart,
   Gem,
   Landmark,
-  Trophy,
-  Headphones
+  Trophy
 } from 'lucide-react';
 
 import { AppSettings } from './types';
@@ -129,6 +128,16 @@ const PRAYERS_INFO = {
     tip: 'أشرقت الشمس فصلاة الضحى تبدأ بعد الشروق بقرابة ربع ساعة، وهي صلاة الأوابين وتعدل صدقة عن كل مفصل من مفاصل جسدك.'
   }
 };
+
+function DecorativeSectionIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-amber-300/60 bg-gradient-to-br from-emerald-500 via-teal-700 to-emerald-950 text-amber-200 shadow-inner shadow-amber-300/20">
+      <span className="absolute inset-[3px] rounded-xl border border-white/15" aria-hidden="true" />
+      <span className="relative z-10">{children}</span>
+      <span className="absolute -right-1 -top-1 text-[9px] leading-none text-amber-300" aria-hidden="true">✦</span>
+    </span>
+  );
+}
 
 export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -1086,7 +1095,7 @@ export default function App() {
       id: 'prophets',
       title: isEn ? 'Prophets and Messengers' : 'قصص الأنبياء والرسل',
       desc: isEn ? 'Verified Quranic stories with sources and lessons' : 'قصص موثقة مرتبطة بآيات القرآن ومصادرها',
-      icon: <ScrollText className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><ScrollText className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-emerald-700 to-cyan-700',
       bgLight: 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20',
       component: <KnowledgeSection id="prophets" isEn={isEn} />
@@ -1095,7 +1104,7 @@ export default function App() {
       id: 'seerah',
       title: isEn ? 'Prophetic Seerah' : 'السيرة النبوية',
       desc: isEn ? 'A dedicated timeline of the Prophet’s life' : 'حياة النبي ﷺ وأحداث السيرة من مصادرها',
-      icon: <History className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><History className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-teal-700 to-emerald-700',
       bgLight: 'bg-teal-500/10 text-teal-800 border-teal-500/20',
       component: <KnowledgeSection id="seerah" isEn={isEn} />
@@ -1104,7 +1113,7 @@ export default function App() {
       id: 'companions',
       title: isEn ? 'Companions and Followers' : 'الصحابة والتابعون',
       desc: isEn ? 'Biographies and verified historical accounts' : 'تراجم الصحابة والتابعين ومواقفهم الموثقة',
-      icon: <UsersRound className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><UsersRound className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-amber-600 to-orange-600',
       bgLight: 'bg-amber-500/10 text-amber-800 border-amber-500/20',
       component: <KnowledgeSection id="companions" isEn={isEn} />
@@ -1113,7 +1122,7 @@ export default function App() {
       id: 'islamic-stories',
       title: isEn ? 'Islamic Stories' : 'قصص إسلامية متنوعة',
       desc: isEn ? 'Quranic stories, righteous people and Islamic history' : 'قصص القرآن والصالحين والتاريخ الإسلامي مع المصادر',
-      icon: <Landmark className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><Landmark className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-indigo-600 to-purple-600',
       bgLight: 'bg-indigo-500/10 text-indigo-800 border-indigo-500/20',
       component: <KnowledgeSection id="islamic-stories" isEn={isEn} />
@@ -1122,7 +1131,7 @@ export default function App() {
       id: 'fiqh',
       title: isEn ? 'Worship and Fiqh' : 'العبادات والفقه',
       desc: isEn ? 'Educational worship guidance with scholarly references' : 'تعليم العبادات والفقه مع إحالة المسائل الخاصة للعلماء',
-      icon: <HandHeart className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><HandHeart className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-sky-700 to-indigo-700',
       bgLight: 'bg-sky-500/10 text-sky-800 border-sky-500/20',
       component: <KnowledgeSection id="fiqh" isEn={isEn} />
@@ -1218,7 +1227,7 @@ export default function App() {
       id: 'names-of-allah',
       title: isEn ? 'Names of Allah' : 'أسماء الله الحسنى',
       desc: isEn ? 'The beautiful names with evidence and meanings' : 'أسماء الله الحسنى ومعانيها من مصادر موثوقة',
-      icon: <Gem className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><Gem className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-yellow-600 to-amber-600',
       bgLight: 'bg-yellow-500/10 text-yellow-800 border-yellow-500/20',
       component: <KnowledgeSection id="names-of-allah" isEn={isEn} />
@@ -1227,7 +1236,7 @@ export default function App() {
       id: 'afterlife',
       title: isEn ? 'The Afterlife' : 'الجنة والنار والآخرة',
       desc: isEn ? 'Quran and authentic Sunnah on the Hereafter' : 'موضوعات الآخرة من القرآن والسنة الصحيحة',
-      icon: <Shield className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><Shield className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-rose-700 to-red-700',
       bgLight: 'bg-rose-500/10 text-rose-800 border-rose-500/20',
       component: <KnowledgeSection id="afterlife" isEn={isEn} />
@@ -1236,7 +1245,7 @@ export default function App() {
       id: 'challenges',
       title: isEn ? 'Islamic Challenges' : 'التحديات والمعلومات الإسلامية',
       desc: isEn ? 'Source-based questions, quizzes and learning progress' : 'أسئلة ومسابقات إسلامية مع مصادر وإحصاءات تعلم',
-      icon: <Trophy className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><Trophy className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-fuchsia-600 to-purple-700',
       bgLight: 'bg-fuchsia-500/10 text-fuchsia-800 border-fuchsia-500/20',
       component: <KnowledgeSection id="challenges" isEn={isEn} />
@@ -1245,7 +1254,7 @@ export default function App() {
       id: 'islamic-library',
       title: isEn ? 'Islamic Library' : 'المكتبة الإسلامية',
       desc: isEn ? 'Podcasts, Quran recitations, lessons, official sources and Quran quiz' : 'بودكاست وتلاوات ودروس ومصادر رسمية ومسابقات القرآن الكريم',
-      icon: <Library className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><Library className="h-5 w-5" /></DecorativeSectionIcon>,
       avatarUrl: ISLAMIC_AVATARS.khatma,
       colorClass: 'from-amber-600 to-emerald-700',
       bgLight: 'bg-amber-500/10 text-amber-900 border-amber-500/20',
@@ -1295,7 +1304,7 @@ export default function App() {
       id: 'profile',
       title: isEn ? 'Personal Account' : 'الحساب الشخصي',
       desc: isEn ? 'Progress, favorites, khatma and personal settings' : 'المفضلة والتقدم والختمة والإنجازات الشخصية',
-      icon: <CircleUserRound className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><CircleUserRound className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-cyan-700 to-blue-700',
       bgLight: 'bg-cyan-500/10 text-cyan-800 border-cyan-500/20',
       component: <ProfileSection settings={settings} isEn={isEn} onNavigateSection={handleNavigateToSection} />
@@ -1304,7 +1313,7 @@ export default function App() {
       id: 'admin-dashboard',
       title: isEn ? 'Administration Dashboard' : 'لوحة تحكم الإدارة',
       desc: isEn ? 'Protected content management area' : 'لوحة إدارة محمية لإدارة المحتوى والمستخدمين',
-      icon: <Settings className="w-6 h-6" />,
+      icon: <DecorativeSectionIcon><Settings className="h-5 w-5" /></DecorativeSectionIcon>,
       colorClass: 'from-slate-700 to-slate-900',
       bgLight: 'bg-slate-500/10 text-slate-800 border-slate-500/20',
       component: <KnowledgeSection id="admin-dashboard" isEn={isEn} />
