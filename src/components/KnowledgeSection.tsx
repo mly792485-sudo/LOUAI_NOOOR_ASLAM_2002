@@ -4,7 +4,8 @@ import { safeStorage } from '../utils/safeStorage';
 import { PROPHET_STORIES } from '../data/prophets_stories';
 import { SEERAH_ENTRIES } from '../data/seerah';
 import { COMPANIONS_ENTRIES } from '../data/companions';
-import { ALLAH_NAMES_ENTRIES, AFTERLIFE_ENTRIES, FIQH_ENTRIES, ISLAMIC_STORIES } from '../data/knowledge_expanded';
+import { AFTERLIFE_ENTRIES, FIQH_ENTRIES, ISLAMIC_STORIES } from '../data/knowledge_expanded';
+import { ALLAH_NAMES_99_ENTRIES } from '../data/allah_names_99';
 
 export type KnowledgeSectionId =
   | 'prophets'
@@ -52,8 +53,8 @@ const CONTENT: Record<KnowledgeSectionId, { ar: string; en: string; introAr: str
   },
   'names-of-allah': {
     ar: 'أسماء الله الحسنى', en: 'Names of Allah',
-    introAr: 'معانٍ مختصرة لأسماء وردت أدلتها، مع التنبيه أن حصر الأسماء يحتاج تحريرًا علميًا ولا يصح اعتماد قوائم غير موثقة.', introEn: 'Short sourced meanings for names established by revelation, with a clear methodology note.',
-    cards: ALLAH_NAMES_ENTRIES,
+    introAr: 'قائمة تعليمية من 99 اسمًا مرتبة ومرقمة، مع معنى مختصر ومصدر المنهج. تنبيه: الأسماء الحسنى ليست محصورة في هذا العدد، وسرد القائمة في حديث واحد ليس ثابتًا.', introEn: 'A numbered educational list of 99 names with brief meanings. The names are not limited to this number, and the popular list is not a single authenticated narration.',
+    cards: ALLAH_NAMES_99_ENTRIES,
   },
   afterlife: {
     ar: 'الجنة والنار والآخرة', en: 'Afterlife',
