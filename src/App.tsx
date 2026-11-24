@@ -1643,22 +1643,20 @@ export default function App() {
                       {sections.find(s => s.id === activeSection)?.title}
                     </h2>
                     <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-500 text-white flex items-center justify-center p-2.5 shadow-md shadow-emerald-950/40 shrink-0 border border-emerald-400/20 overflow-hidden">
-                      <span className={`inline-flex h-6 w-6 items-center justify-center [&>span]:scale-[0.52] [&>svg]:h-5 [&>svg]:w-5 ${activeSection === 'quran' ? '[&>svg]:h-4 [&>svg]:w-4' : ''}`}>
-                        {sections.find(s => s.id === activeSection)?.icon || <BookOpen className="h-5 w-5 text-white" />}
-                      </span>
+                      {sections.find(s => s.id === activeSection)?.icon || <BookOpen className="w-5 h-5 text-white" />}
                     </div>
                   </div>
 
                 </div>
 
                 {/* Bottom Row: Wrapped quick-switch menu so every section remains visible on phones */}
-                <div className="flex flex-wrap items-center gap-2.5 pb-1 pt-0.5 text-xs sm:text-sm">
+                <div className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-0.5 scrollbar-none text-xs sm:text-sm">
                   
                   {/* Home tab pill */}
                   <button
                     id="quick-tab-home"
                     onClick={() => handleNavigateToSection(null)}
-                    className="px-3 py-1.5 rounded-full font-kufi font-bold bg-[#060B0C] hover:bg-[#122427] text-slate-300 hover:text-white border border-[#1A2D31] transition-all cursor-pointer flex items-center gap-2 active:scale-95 text-xs sm:text-sm"
+                    className="px-3 py-1.5 rounded-full font-kufi font-bold bg-[#060B0C] hover:bg-[#122427] text-slate-300 hover:text-white border border-[#1A2D31] transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95 text-xs sm:text-sm"
                   >
                     <span>{isEn ? "Home" : "الرئيسية"}</span>
                     <span className="text-sm">🏠</span>
@@ -1672,14 +1670,14 @@ export default function App() {
                         key={s.id}
                         id={`quick-tab-${s.id}`}
                         onClick={() => handleNavigateToSection(s.id)}
-                        className={`px-3 sm:px-4 py-1.5 rounded-full font-kufi transition-all cursor-pointer flex items-center gap-2 active:scale-95 text-xs sm:text-sm ${
+                        className={`px-3 sm:px-4 py-1.5 rounded-full font-kufi transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95 text-xs sm:text-sm ${
                           isActive
                             ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-black shadow-lg shadow-emerald-950/60 border-0'
                             : 'bg-[#060B0C] hover:bg-[#122427] text-slate-300 hover:text-emerald-300 border border-[#1A2D31] font-bold'
                         }`}
                       >
                         <span className="whitespace-nowrap">{s.title}</span>
-                        <span className={`inline-flex h-5 w-5 items-center justify-center overflow-hidden ${isActive ? 'text-white' : 'text-emerald-400'} [&>span]:scale-[0.52] ${s.id === 'quran' ? '[&>svg]:h-3 [&>svg]:w-3' : '[&>svg]:h-4 [&>svg]:w-4'}`}>
+                        <span className={isActive ? 'text-white' : 'text-emerald-400'}>
                           {s.icon}
                         </span>
                       </button>
