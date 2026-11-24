@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { BookOpen, CheckCircle2, ChevronDown, LockKeyhole, Search, ShieldCheck, Star } from 'lucide-react';
 import { safeStorage } from '../utils/safeStorage';
+import { PROPHET_STORIES } from '../data/prophets_stories';
 
 export type KnowledgeSectionId =
   | 'prophets'
@@ -23,12 +24,8 @@ type Card = { title: string; description: string; source?: string };
 const CONTENT: Record<KnowledgeSectionId, { ar: string; en: string; introAr: string; introEn: string; cards: Card[]; protected?: boolean }> = {
   prophets: {
     ar: 'قصص الأنبياء والرسل', en: 'Prophets and Messengers',
-    introAr: 'قسم مستقل لقصص الأنبياء المذكورين في القرآن، مع ربط القصة بمواضع الآيات ومصادرها.', introEn: 'A dedicated section for Quranic prophet stories linked to their verses and sources.',
-    cards: [
-      { title: 'فهرس الأنبياء المذكورين في القرآن', description: 'فهرس تمهيدي لا يعرض قصة غير موثقة؛ عند اختيار الاسم تُربط الآيات والمراجع قبل النشر.', source: 'القرآن الكريم' },
-      { title: 'الدروس والعبر', description: 'تُعرض بعد مراجعة المادة من مصدر تفسيري أو سيرة معتمد، ولا تُنسب للشرع من غير توثيق.', source: 'التفسير الموثق' },
-      { title: 'الاستماع إلى القصص', description: 'الصوتيات ستُضاف من مصدر مرخص ومطابقة للنص، ولن نستخدم صوتاً مولداً للمحتوى الديني.' },
-    ],
+    introAr: 'فهرس محلي للأنبياء والرسل المذكورين بأسمائهم في القرآن الكريم، مع مواضع القصة والدروس والمراجع الإسلامية داخل التطبيق.', introEn: 'An offline index of the prophets named in the Quran, with Quran references, lessons and Islamic references inside the app.',
+    cards: PROPHET_STORIES,
   },
   seerah: {
     ar: 'السيرة النبوية', en: 'Prophetic Seerah',
