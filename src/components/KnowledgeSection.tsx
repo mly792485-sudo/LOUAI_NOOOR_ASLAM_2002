@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { BookOpen, CheckCircle2, ChevronDown, LockKeyhole, Search, ShieldCheck, Star } from 'lucide-react';
 import { safeStorage } from '../utils/safeStorage';
-import { PROPHET_STORIES } from '../data/prophets_stories';
+import { EXPANDED_PROPHET_STORIES } from '../data/prophets_stories_expanded';
 import { SEERAH_ENTRIES } from '../data/seerah';
 import { COMPANIONS_ENTRIES } from '../data/companions';
 import { AFTERLIFE_ENTRIES, FIQH_ENTRIES, ISLAMIC_STORIES } from '../data/knowledge_expanded';
@@ -28,8 +28,8 @@ type Card = { title: string; description: string; source?: string };
 const CONTENT: Record<KnowledgeSectionId, { ar: string; en: string; introAr: string; introEn: string; cards: Card[]; protected?: boolean }> = {
   prophets: {
     ar: 'قصص الأنبياء والرسل', en: 'Prophets and Messengers',
-    introAr: 'فهرس محلي للأنبياء والرسل المذكورين بأسمائهم في القرآن الكريم، مع مواضع القصة والدروس والمراجع الإسلامية داخل التطبيق.', introEn: 'An offline index of the prophets named in the Quran, with Quran references, lessons and Islamic references inside the app.',
-    cards: PROPHET_STORIES,
+    introAr: 'سرد تعليمي موسع للأنبياء والرسل المذكورين بأسمائهم في القرآن، مرتب بحسب مراحل القصة مع مواضع الآيات والدروس والمراجع. ما لم يفصله الوحي لا نملؤه بروايات غير ثابتة.', introEn: 'Expanded educational narratives for the prophets named in the Quran, with verse locations, lessons and sources. Unestablished details are not presented as fact.',
+    cards: EXPANDED_PROPHET_STORIES,
   },
   seerah: {
     ar: 'السيرة النبوية', en: 'Prophetic Seerah',
