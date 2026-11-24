@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { BookOpen, ChevronDown, ExternalLink, LockKeyhole, Search, ShieldCheck } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
+import { BookOpen, CheckCircle2, ChevronDown, LockKeyhole, Search, ShieldCheck, Star } from 'lucide-react';
+import { safeStorage } from '../utils/safeStorage';
 
 export type KnowledgeSectionId =
   | 'prophets'
@@ -19,7 +18,7 @@ interface KnowledgeSectionProps {
   isEn?: boolean;
 }
 
-type Card = { title: string; description: string; source?: string; url?: string };
+type Card = { title: string; description: string; source?: string };
 
 const CONTENT: Record<KnowledgeSectionId, { ar: string; en: string; introAr: string; introEn: string; cards: Card[]; protected?: boolean }> = {
   prophets: {
@@ -110,14 +109,31 @@ export default function KnowledgeSection({ id, isEn = false }: KnowledgeSectionP
   const content = CONTENT[id];
   const [query, setQuery] = useState('');
   const [openedCard, setOpenedCard] = useState<string | null>(null);
+  const storageKey = `noor_knowledge_${id}`;
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try { return JSON.parse(safeStorage.getItem(`${storageKey}_favorites`) || '[]'); } catch { return []; }
+  });
+  const [completed, setCompleted] = useState<string[]>(() => {
+    try { return JSON.parse(safeStorage.getItem(`${storageKey}_completed`) || '[]'); } catch { return []; }
+  });
   const visibleCards = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
     if (!normalized) return content.cards;
     return content.cards.filter((card) => `${card.title} ${card.description} ${card.source || ''}`.toLocaleLowerCase().includes(normalized));
   }, [content.cards, query]);
-  const openSource = async (url: string) => {
-    if (Capacitor.isNativePlatform()) await Browser.open({ url });
-    else window.open(url, '_blank', 'noopener,noreferrer');
+  const toggleFavorite = (title: string) => {
+    setFavorites((current) => {
+      const next = current.includes(title) ? current.filter((item) => item !== title) : [...current, title];
+      safeStorage.setItem(`${storageKey}_favorites`, JSON.stringify(next));
+      return next;
+    });
+  };
+  const toggleCompleted = (title: string) => {
+    setCompleted((current) => {
+      const next = current.includes(title) ? current.filter((item) => item !== title) : [...current, title];
+      safeStorage.setItem(`${storageKey}_completed`, JSON.stringify(next));
+      return next;
+    });
   };
   return (
     <section data-knowledge-section={id} className="rounded-3xl border border-emerald-500/20 bg-[#061214] p-4 sm:p-6 text-right text-white shadow-xl" dir={isEn ? 'ltr' : 'rtl'}>
@@ -136,7 +152,11 @@ export default function KnowledgeSection({ id, isEn = false }: KnowledgeSectionP
           className={`w-full rounded-2xl border border-emerald-500/20 bg-[#091b1f] py-2.5 text-xs text-white outline-none transition focus:border-amber-400 ${isEn ? 'pl-9 pr-3 text-left' : 'pr-9 pl-3 text-right'}`}
         />
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] font-bold text-slate-400">
+        <span>{isEn ? `${favorites.length} saved offline` : `${favorites.length} محفوظة دون إنترنت`}</span>
+        <span>{isEn ? `${completed.length}/${content.cards.length} completed` : `${completed.length}/${content.cards.length} تمت مراجعتها`}</span>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {visibleCards.length === 0 ? (
           <p className="sm:col-span-2 lg:col-span-3 rounded-2xl border border-dashed border-emerald-500/20 p-5 text-center text-xs text-slate-400">{isEn ? 'No matching items in this section.' : 'لا توجد عناصر مطابقة داخل هذا القسم.'}</p>
         ) : visibleCards.map((card) => {
@@ -147,7 +167,7 @@ export default function KnowledgeSection({ id, isEn = false }: KnowledgeSectionP
                 <h4 className="text-sm font-black text-amber-300">{card.title}</h4>
                 <ChevronDown className={`h-4 w-4 shrink-0 text-emerald-300 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
               </button>
-              {isOpen && <div className="mt-2 border-t border-emerald-500/10 pt-2"><p className="text-xs leading-relaxed text-slate-300">{card.description}</p>{card.source && <p className="mt-3 flex items-center gap-1 text-[10px] font-bold text-emerald-400"><ShieldCheck className="h-3.5 w-3.5" />{isEn ? 'Source:' : 'المصدر:'} {card.source}</p>}{card.url && <button type="button" onClick={() => void openSource(card.url!)} className="mt-3 inline-flex items-center gap-1 rounded-xl border border-emerald-500/25 px-3 py-1.5 text-[10px] font-bold text-emerald-300">{isEn ? 'Open source' : 'فتح المصدر'} <ExternalLink className="h-3.5 w-3.5" /></button>}</div>}
+              {isOpen && <div className="mt-2 border-t border-emerald-500/10 pt-2"><p className="text-xs leading-relaxed text-slate-300">{card.description}</p>{card.source && <p className="mt-3 flex items-center gap-1 text-[10px] font-bold text-emerald-400"><ShieldCheck className="h-3.5 w-3.5" />{isEn ? 'Verified reference:' : 'المرجع الموثق:'} {card.source}</p>}<div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={() => toggleFavorite(card.title)} className="inline-flex items-center gap-1 rounded-xl border border-amber-400/25 px-3 py-1.5 text-[10px] font-bold text-amber-200"><Star className={`h-3.5 w-3.5 ${favorites.includes(card.title) ? 'fill-current' : ''}`} />{favorites.includes(card.title) ? (isEn ? 'Saved offline' : 'محفوظة') : (isEn ? 'Save offline' : 'حفظ دون إنترنت')}</button><button type="button" onClick={() => toggleCompleted(card.title)} className="inline-flex items-center gap-1 rounded-xl border border-emerald-400/25 px-3 py-1.5 text-[10px] font-bold text-emerald-200"><CheckCircle2 className={`h-3.5 w-3.5 ${completed.includes(card.title) ? 'fill-current text-emerald-400' : ''}`} />{completed.includes(card.title) ? (isEn ? 'Completed' : 'تمت المراجعة') : (isEn ? 'Mark reviewed' : 'تحديد كمراجعة')}</button></div></div>}
             </article>
           );
         })}
