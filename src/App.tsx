@@ -1652,13 +1652,13 @@ export default function App() {
                 </div>
 
                 {/* Bottom Row: Wrapped quick-switch menu so every section remains visible on phones */}
-                <div className="flex flex-wrap items-center gap-2.5 pb-1 pt-0.5 text-xs sm:text-sm">
+                <div className="grid w-full grid-cols-2 gap-2 pb-1 pt-0.5 text-xs sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-4 sm:text-sm">
                   
                   {/* Home tab pill */}
                   <button
                     id="quick-tab-home"
                     onClick={() => handleNavigateToSection(null)}
-                    className="px-3 py-1.5 rounded-full font-kufi font-bold bg-[#060B0C] hover:bg-[#122427] text-slate-300 hover:text-white border border-[#1A2D31] transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95 text-xs sm:text-sm"
+                    className="min-w-0 w-full px-2 py-1.5 rounded-full font-kufi font-bold bg-[#060B0C] hover:bg-[#122427] text-slate-300 hover:text-white border border-[#1A2D31] transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 text-xs sm:text-sm"
                   >
                     <span>{isEn ? "Home" : "الرئيسية"}</span>
                     <span className="text-sm">🏠</span>
@@ -1672,13 +1672,13 @@ export default function App() {
                         key={s.id}
                         id={`quick-tab-${s.id}`}
                         onClick={() => handleNavigateToSection(s.id)}
-                        className={`px-3 sm:px-4 py-1.5 rounded-full font-kufi transition-all shrink-0 cursor-pointer flex items-center gap-2 active:scale-95 text-xs sm:text-sm ${
+                        className={`min-w-0 w-full px-2 sm:px-3 py-1.5 rounded-full font-kufi transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 text-xs sm:text-sm ${
                           isActive
                             ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-black shadow-lg shadow-emerald-950/60 border-0'
                             : 'bg-[#060B0C] hover:bg-[#122427] text-slate-300 hover:text-emerald-300 border border-[#1A2D31] font-bold'
                         }`}
                       >
-                        <span className="whitespace-nowrap">{s.title}</span>
+                        <span className="min-w-0 whitespace-normal text-center leading-tight">{s.title}</span>
                         <span className={`inline-flex h-5 w-5 items-center justify-center overflow-hidden ${isActive ? 'text-white' : 'text-emerald-400'} [&>span]:scale-[0.52] ${s.id === 'quran' ? '[&>svg]:h-3 [&>svg]:w-3' : '[&>svg]:h-4 [&>svg]:w-4'}`}>
                           {s.icon}
                         </span>
