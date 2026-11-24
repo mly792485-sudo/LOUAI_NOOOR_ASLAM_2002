@@ -42,7 +42,15 @@ import {
   RotateCw,
   Library,
   Calculator,
-  CircleUserRound
+  CircleUserRound,
+  ScrollText,
+  UsersRound,
+  History,
+  HandHeart,
+  Gem,
+  Landmark,
+  Trophy,
+  Headphones
 } from 'lucide-react';
 
 import { AppSettings } from './types';
@@ -1078,7 +1086,7 @@ export default function App() {
       id: 'prophets',
       title: isEn ? 'Prophets and Messengers' : 'قصص الأنبياء والرسل',
       desc: isEn ? 'Verified Quranic stories with sources and lessons' : 'قصص موثقة مرتبطة بآيات القرآن ومصادرها',
-      icon: <BookOpen className="w-6 h-6" />,
+      icon: <ScrollText className="w-6 h-6" />,
       colorClass: 'from-emerald-700 to-cyan-700',
       bgLight: 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20',
       component: <KnowledgeSection id="prophets" isEn={isEn} />
@@ -1087,7 +1095,7 @@ export default function App() {
       id: 'seerah',
       title: isEn ? 'Prophetic Seerah' : 'السيرة النبوية',
       desc: isEn ? 'A dedicated timeline of the Prophet’s life' : 'حياة النبي ﷺ وأحداث السيرة من مصادرها',
-      icon: <BookOpenCheck className="w-6 h-6" />,
+      icon: <History className="w-6 h-6" />,
       colorClass: 'from-teal-700 to-emerald-700',
       bgLight: 'bg-teal-500/10 text-teal-800 border-teal-500/20',
       component: <KnowledgeSection id="seerah" isEn={isEn} />
@@ -1096,7 +1104,7 @@ export default function App() {
       id: 'companions',
       title: isEn ? 'Companions and Followers' : 'الصحابة والتابعون',
       desc: isEn ? 'Biographies and verified historical accounts' : 'تراجم الصحابة والتابعين ومواقفهم الموثقة',
-      icon: <Heart className="w-6 h-6" />,
+      icon: <UsersRound className="w-6 h-6" />,
       colorClass: 'from-amber-600 to-orange-600',
       bgLight: 'bg-amber-500/10 text-amber-800 border-amber-500/20',
       component: <KnowledgeSection id="companions" isEn={isEn} />
@@ -1105,7 +1113,7 @@ export default function App() {
       id: 'islamic-stories',
       title: isEn ? 'Islamic Stories' : 'قصص إسلامية متنوعة',
       desc: isEn ? 'Quranic stories, righteous people and Islamic history' : 'قصص القرآن والصالحين والتاريخ الإسلامي مع المصادر',
-      icon: <Sparkles className="w-6 h-6" />,
+      icon: <Landmark className="w-6 h-6" />,
       colorClass: 'from-indigo-600 to-purple-600',
       bgLight: 'bg-indigo-500/10 text-indigo-800 border-indigo-500/20',
       component: <KnowledgeSection id="islamic-stories" isEn={isEn} />
@@ -1114,7 +1122,7 @@ export default function App() {
       id: 'fiqh',
       title: isEn ? 'Worship and Fiqh' : 'العبادات والفقه',
       desc: isEn ? 'Educational worship guidance with scholarly references' : 'تعليم العبادات والفقه مع إحالة المسائل الخاصة للعلماء',
-      icon: <Shield className="w-6 h-6" />,
+      icon: <HandHeart className="w-6 h-6" />,
       colorClass: 'from-sky-700 to-indigo-700',
       bgLight: 'bg-sky-500/10 text-sky-800 border-sky-500/20',
       component: <KnowledgeSection id="fiqh" isEn={isEn} />
@@ -1210,7 +1218,7 @@ export default function App() {
       id: 'names-of-allah',
       title: isEn ? 'Names of Allah' : 'أسماء الله الحسنى',
       desc: isEn ? 'The beautiful names with evidence and meanings' : 'أسماء الله الحسنى ومعانيها من مصادر موثوقة',
-      icon: <Star className="w-6 h-6" />,
+      icon: <Gem className="w-6 h-6" />,
       colorClass: 'from-yellow-600 to-amber-600',
       bgLight: 'bg-yellow-500/10 text-yellow-800 border-yellow-500/20',
       component: <KnowledgeSection id="names-of-allah" isEn={isEn} />
@@ -1228,7 +1236,7 @@ export default function App() {
       id: 'challenges',
       title: isEn ? 'Islamic Challenges' : 'التحديات والمعلومات الإسلامية',
       desc: isEn ? 'Source-based questions, quizzes and learning progress' : 'أسئلة ومسابقات إسلامية مع مصادر وإحصاءات تعلم',
-      icon: <Award className="w-6 h-6" />,
+      icon: <Trophy className="w-6 h-6" />,
       colorClass: 'from-fuchsia-600 to-purple-700',
       bgLight: 'bg-fuchsia-500/10 text-fuchsia-800 border-fuchsia-500/20',
       component: <KnowledgeSection id="challenges" isEn={isEn} />
