@@ -46,6 +46,7 @@ import { safeStorage } from '../utils/safeStorage';
 import { fetchJsonWithOfflineCache } from '../utils/offlineCache';
 import { loadTafsirSurah, TAFSIR_SOURCES } from '../services/tafsirOfflineManager';
 import MushafPageReader from './MushafPageReader';
+import QuranSciencesHub from './QuranSciencesHub';
 
 const FONT_FAMILIES = [
   { id: 'amiri', name: 'خط حفص / عثماني (الأميري)', class: 'font-amiri' },
@@ -557,6 +558,14 @@ export default function QuranSection({ isEn = false }: QuranSectionProps) {
               </button>
             )}
           </div>
+
+          <QuranSciencesHub
+            isEn={isEn}
+            onOpenSurah={(surahNumber) => {
+              const meta = quranMetadata.find((surah) => surah.number === surahNumber);
+              if (meta) void handleSelectSurah(meta);
+            }}
+          />
 
           {/* Quick Specific Ayah Lookup Form (OPENAI ENABLED) */}
           <div className="p-4 sm:p-5 bg-[#091B1F] border border-emerald-500/25 rounded-3xl space-y-3">

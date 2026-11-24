@@ -1063,8 +1063,8 @@ export default function App() {
   const sections = useMemo(() => [
     {
       id: 'quran',
-      title: isEn ? 'Holy Quran & Tafsir' : 'القرآن الكريم وتفسيره',
-      desc: isEn ? 'Complete Holy Quran with audio recitation and easy Tafsir' : 'المصحف الشريف كاملاً بآياته والتفاسير الميسرة',
+      title: isEn ? 'Quran & Quran Sciences' : 'القرآن الكريم وعلومه',
+      desc: isEn ? 'Mushaf, verified tafsir, Quran sciences, topics, search and memorization' : 'المصحف والتفسير وعلوم القرآن والموضوعات والبحث وخطة الحفظ',
       icon: <BookOpen className="w-6 h-6" />,
       avatarUrl: ISLAMIC_AVATARS.quran,
       colorClass: 'from-emerald-600 to-teal-500',
